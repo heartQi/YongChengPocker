@@ -157,7 +157,33 @@ h2 {
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(31, 41, 51, 0.62);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255, 227, 142, 0.18), transparent 24%),
+    linear-gradient(135deg, rgba(12, 62, 49, 0.94), rgba(13, 32, 36, 0.96));
+}
+
+.difficulty-screen::before,
+.difficulty-screen::after {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  pointer-events: none;
+}
+
+.difficulty-screen::before {
+  background:
+    linear-gradient(115deg, transparent 0 46%, rgba(255, 255, 255, 0.12) 49%, transparent 52%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 7px);
+  opacity: 0.55;
+  animation: start-sweep 5200ms ease-in-out infinite;
+}
+
+.difficulty-screen::after {
+  background:
+    radial-gradient(circle at 18% 24%, rgba(217, 155, 43, 0.24), transparent 11%),
+    radial-gradient(circle at 82% 74%, rgba(199, 59, 70, 0.18), transparent 12%);
+  opacity: 0.78;
 }
 
 .difficulty-screen.hidden {
@@ -334,27 +360,114 @@ h2 {
 }
 
 .difficulty-panel {
-  width: min(360px, 100%);
-  padding: 34px 28px;
-  border: 1px solid var(--line);
-  background: #ffffff;
+  position: relative;
+  z-index: 1;
+  width: min(460px, 100%);
+  min-height: 400px;
+  padding: 34px 28px 30px;
+  border: 3px solid #f1c75a;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 42%),
+    linear-gradient(145deg, #183f35 0%, #0c261f 100%);
+  color: #fff7d6;
   text-align: center;
-  box-shadow: 0 24px 70px rgba(17, 24, 39, 0.28);
+  box-shadow: 0 0 0 5px rgba(4, 20, 16, 0.82), 0 28px 78px rgba(4, 17, 14, 0.58),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+
+.difficulty-panel::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(241, 199, 90, 0.38);
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.start-emblem {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: 6px 0 18px;
+  font-size: 28px;
+  font-weight: 900;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.38);
+}
+
+.start-emblem span:nth-child(2),
+.start-emblem span:nth-child(4) {
+  color: #ff7380;
+}
+
+.start-title {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 18px;
+  color: #ffe38e;
+  font-size: clamp(42px, 9vw, 72px);
+  font-weight: 900;
+  line-height: 0.98;
+  text-shadow: 0 4px 0 #6f241f, 0 10px 24px rgba(0, 0, 0, 0.5);
+}
+
+.start-card-fan {
+  position: relative;
+  z-index: 1;
+  width: 176px;
+  height: 112px;
+  margin: 0 auto 24px;
+}
+
+.start-card-fan span {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 78px;
+  height: 104px;
+  border: 3px solid #fff7d6;
+  border-radius: 7px;
+  background:
+    linear-gradient(135deg, transparent 42%, rgba(255, 255, 255, 0.18) 42% 58%, transparent 58%),
+    repeating-linear-gradient(45deg, #b82532 0 6px, #7d1722 6px 12px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.32);
+  transform-origin: 50% 110%;
+}
+
+.start-card-fan span:nth-child(1) {
+  transform: translateX(-86px) rotate(-16deg);
+}
+
+.start-card-fan span:nth-child(2) {
+  background:
+    linear-gradient(135deg, transparent 42%, rgba(255, 255, 255, 0.18) 42% 58%, transparent 58%),
+    repeating-linear-gradient(45deg, #244f9c 0 6px, #16366e 6px 12px);
+  transform: translateX(-39px) rotate(0deg);
+}
+
+.start-card-fan span:nth-child(3) {
+  transform: translateX(8px) rotate(16deg);
 }
 
 .start-game-button {
+  position: relative;
+  z-index: 1;
   display: block;
   width: min(260px, 100%);
-  min-height: 64px;
+  min-height: 68px;
   margin: 0 auto;
-  border: 1px solid #163b82;
+  border: 3px solid #3b2108;
   border-radius: 8px;
-  background: linear-gradient(180deg, #426fc4 0%, #264f9d 100%);
-  color: #fff;
+  background: linear-gradient(180deg, #ffe38e 0%, #d99b2b 100%);
+  color: #2b1706;
   font-size: 24px;
   font-weight: 900;
   letter-spacing: 0;
-  box-shadow: 0 14px 28px rgba(31, 78, 160, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  text-transform: uppercase;
+  box-shadow: 0 7px 0 #6f3c10, 0 18px 30px rgba(0, 0, 0, 0.36), inset 0 2px 0 rgba(255, 255, 255, 0.46);
   cursor: pointer;
   transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
 }
@@ -367,14 +480,24 @@ h2 {
 .start-game-button:not(:disabled):hover,
 .start-game-button:not(:disabled):focus-visible {
   filter: brightness(1.06);
-  box-shadow: 0 18px 36px rgba(31, 78, 160, 0.38), 0 0 0 4px rgba(53, 89, 166, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  box-shadow: 0 7px 0 #6f3c10, 0 22px 38px rgba(0, 0, 0, 0.44), 0 0 0 5px rgba(255, 227, 142, 0.18),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5);
   outline: none;
 }
 
 .start-game-button:not(:disabled):active {
-  transform: translateY(1px);
-  box-shadow: 0 10px 20px rgba(31, 78, 160, 0.28), inset 0 1px 3px rgba(17, 24, 39, 0.2);
+  transform: translateY(5px);
+  box-shadow: 0 2px 0 #6f3c10, 0 10px 18px rgba(0, 0, 0, 0.34), inset 0 2px 4px rgba(43, 23, 6, 0.22);
+}
+
+@keyframes start-sweep {
+  0%,
+  100% {
+    transform: translateX(-9%) rotate(0deg);
+  }
+  50% {
+    transform: translateX(9%) rotate(1deg);
+  }
 }
 
 .layout {
