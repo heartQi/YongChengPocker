@@ -25,6 +25,15 @@
               <option value="1200">快速</option>
             </select>
           </label>
+          <label class="difficulty-control" for="difficultySelect">
+            难度
+            <select id="difficultySelect" aria-label="游戏难度">
+              <option value="easy">简单</option>
+              <option value="normal">较难</option>
+              <option value="hard" selected>困难</option>
+              <option value="expert">超难</option>
+            </select>
+          </label>
           <button id="restartButton" class="top-button" type="button">重新开始</button>
         </div>
       </header>
@@ -57,25 +66,9 @@
       <section id="difficultyScreen" class="difficulty-screen" aria-label="选择难度">
         <div class="difficulty-panel">
           <p class="eyebrow">开始游戏</p>
-          <h2>选择永城扑克难度</h2>
-          <div class="difficulty-options">
-            <button type="button" data-difficulty="easy">
-              <strong>简单</strong>
-              <span>电脑玩家更保守，较少追攻，适合熟悉规则。</span>
-            </button>
-            <button type="button" data-difficulty="normal">
-              <strong>较难</strong>
-              <span>电脑玩家会权衡牌力和胜利目标。</span>
-            </button>
-            <button type="button" data-difficulty="hard">
-              <strong>困难</strong>
-              <span>电脑玩家更积极追攻，并更谨慎保留关键牌。</span>
-            </button>
-            <button type="button" data-difficulty="expert">
-              <strong>超难</strong>
-              <span>电脑玩家更少放弃追攻，并会更主动压迫防守方。</span>
-            </button>
-          </div>
+          <h2>永城扑克</h2>
+          <p class="start-note">默认困难难度</p>
+          <button id="startGameButton" class="start-game-button" type="button">Start</button>
         </div>
       </section>
 

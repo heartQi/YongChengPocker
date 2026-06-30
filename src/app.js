@@ -18,8 +18,11 @@ import {
   completeDefense
 } from "./game.js";
 
+const DEFAULT_DIFFICULTY = "hard";
+
 let selectedDifficulty = null;
-let state = createGame(Math.random, "normal");
+let pendingDifficulty = DEFAULT_DIFFICULTY;
+let state = createGame(Math.random, pendingDifficulty);
 let aiTimer = null;
 let aiStepDelayMs = 1900;
 let selectedCardId = null;
@@ -38,7 +41,9 @@ const takeButton = document.querySelector("#takeButton");
 const playSelectedButton = document.querySelector("#playSelectedButton");
 const restartButton = document.querySelector("#restartButton");
 const difficultyScreen = document.querySelector("#difficultyScreen");
+const startGameButton = document.querySelector("#startGameButton");
 const speedSelect = document.querySelector("#speedSelect");
+const difficultySelect = document.querySelector("#difficultySelect");
 const victoryScreen = document.querySelector("#victoryScreen");
 const victoryTitle = document.querySelector("#victoryTitle");
 const victoryDetail = document.querySelector("#victoryDetail");
@@ -56,21 +61,39 @@ restartButton.addEventListener("click", () => {
   render();
 });
 
-difficultyScreen.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-difficulty]");
-  if (!button) return;
-  selectedDifficulty = button.dataset.difficulty;
+startGameButton.addEventListener("click", () => {
+  startNewGame(pendingDifficulty);
+});
+
+difficultySelect.addEventListener("change", () => {
+  pendingDifficulty = difficultySelect.value;
+  if (!selectedDifficulty) {
+    state = createGame(Math.random, pendingDifficulty);
+    render();
+    return;
+  }
+  clearAiTimer();
+  startNewGame(pendingDifficulty);
+});
+
+function startNewGame(difficulty) {
+  selectedDifficulty = difficulty;
+  pendingDifficulty = difficulty;
+  difficultySelect.value = difficulty;
   state = createGame(Math.random, selectedDifficulty);
   selectedCardId = null;
   difficultyScreen.classList.add("hidden");
+  victoryScreen.classList.add("hidden");
   render();
   scheduleAiStep();
-});
+}
 
 nextRoundButton.addEventListener("click", () => {
   clearAiTimer();
-  state = createGame(Math.random, selectedDifficulty ?? state.difficulty);
+  state = createGame(Math.random, selectedDifficulty ?? pendingDifficulty);
   selectedDifficulty = state.difficulty;
+  pendingDifficulty = state.difficulty;
+  difficultySelect.value = state.difficulty;
   selectedCardId = null;
   victoryScreen.classList.add("hidden");
   difficultyScreen.classList.add("hidden");
@@ -141,6 +164,7 @@ function render() {
   renderLog();
   updateActions();
   updateVictory();
+  updateDifficultySelection();
 }
 
 function renderPlayers() {
@@ -253,7 +277,7 @@ function updateActions() {
   passButton.classList.toggle("is-defense-confirm", canConfirmDefense && !passButton.disabled);
   takeButton.classList.toggle("is-ready", !takeButton.disabled);
   playSelectedButton.classList.toggle("is-ready", canPlaySelectedCard || shouldPromptPlayCard);
-  restartButton.textContent = selectedDifficulty ? "重新开始" : "选择难度";
+  restartButton.textContent = selectedDifficulty ? "重新开始" : "开始游戏";
   if (isChoosingDifficulty) {
     passButton.disabled = true;
     takeButton.disabled = true;
@@ -405,7 +429,7 @@ function updateVictory() {
 
 function currentTurnText() {
   if (state.status === "finished") return `胜方：${state.winnerTeam === 0 ? "A/C" : "B/D"} 阵营`;
-  if (!selectedDifficulty) return "请选择难度";
+  if (!selectedDifficulty) return "点击 Start 开始";
   if (needsHumanInput()) return humanTurnText();
   if (state.status === "defense-choice") return "防守成功待确认";
   if (state.status === "collecting") return "收牌追加中";
@@ -421,7 +445,7 @@ function humanTurnText() {
 }
 
 function hintText() {
-  if (!selectedDifficulty) return "请选择难度开始游戏。";
+  if (!selectedDifficulty) return "点击 Start 直接开始困难难度。";
   if (state.status === "finished") return "点击重新开始再来一局。";
   if (state.status === "defense-choice" && state.defenderId === 0) {
     return "你已防守成功。点“防守成功”确认并进攻下家；点“收牌”则按防守失败处理。";
@@ -438,6 +462,11 @@ function hintText() {
       : "先选可追加的牌，再点“出牌”；也可以放弃追加。";
   }
   return "电脑玩家正在行动。";
+}
+
+function updateDifficultySelection() {
+  startGameButton.disabled = false;
+  difficultySelect.value = pendingDifficulty;
 }
 
 render();

@@ -128,7 +128,8 @@ h2 {
   cursor: pointer;
 }
 
-.speed-control {
+.speed-control,
+.difficulty-control {
   min-height: 30px;
   padding: 4px 7px 4px 9px;
   border: 1px solid var(--line);
@@ -140,7 +141,8 @@ h2 {
   font-weight: 800;
 }
 
-.speed-control select {
+.speed-control select,
+.difficulty-control select {
   min-height: 24px;
   border: 1px solid #c7d0dc;
   background: #fff;
@@ -332,50 +334,46 @@ h2 {
 }
 
 .difficulty-panel {
-  width: min(840px, 100%);
-  padding: 22px;
+  width: min(420px, 100%);
+  padding: 30px 24px;
   border: 1px solid var(--line);
   background: #ffffff;
+  text-align: center;
   box-shadow: 0 24px 70px rgba(17, 24, 39, 0.28);
 }
 
 .difficulty-panel h2 {
+  margin-bottom: 8px;
+  font-size: clamp(30px, 5vw, 42px);
+}
+
+.start-note {
   margin-bottom: 18px;
-  font-size: clamp(24px, 4vw, 34px);
+  color: var(--muted);
+  font-weight: 800;
 }
 
-.difficulty-options {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.difficulty-options button {
-  min-height: 148px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  background: #f8fafc;
-  color: var(--ink);
-  text-align: left;
+.start-game-button {
+  display: block;
+  width: min(240px, 100%);
+  min-height: 54px;
+  margin: 0 auto;
+  border: 0;
+  background: var(--blue);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 900;
   cursor: pointer;
 }
 
-.difficulty-options button:hover,
-.difficulty-options button:focus-visible {
-  border-color: var(--blue);
-  outline: 3px solid rgba(53, 89, 166, 0.18);
+.start-game-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
 }
 
-.difficulty-options strong {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 20px;
-}
-
-.difficulty-options span {
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.45;
+.start-game-button:not(:disabled):hover,
+.start-game-button:not(:disabled):focus-visible {
+  outline: 3px solid rgba(53, 89, 166, 0.2);
 }
 
 .layout {
@@ -856,14 +854,6 @@ button:disabled {
 
   .scoreboard {
     justify-content: flex-start;
-  }
-
-  .difficulty-options {
-    grid-template-columns: 1fr;
-  }
-
-  .difficulty-options button {
-    min-height: 96px;
   }
 
   .actions {

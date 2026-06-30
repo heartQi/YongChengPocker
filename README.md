@@ -4,15 +4,15 @@
 
 Hosted playable demo:
 
-[Open 永城扑克 from GitLab Pages](http://mervin-qi-yongchengpoker.pages.git.ringcentral.com/)
+[Open 永城扑克 from GitLab Pages](http://mervinqi-yongchengpoker.pages.git.ringcentral.com/)
 
 Repository:
 
-[Open the GitLab repository](https://git.ringcentral.com/rc-ai-learning/mervin-qi-yongchengpoker)
+[Open the GitLab repository](https://git.ringcentral.com/rc-ai-learning/mervinqi-yongchengpoker)
 
 Deployment reference:
 
-[Latest GitLab Pages pipeline](https://git.ringcentral.com/rc-ai-learning/mervin-qi-yongchengpoker/-/pipelines)
+[Latest GitLab Pages pipeline](https://git.ringcentral.com/rc-ai-learning/mervinqi-yongchengpoker/-/pipelines)
 
 This project is also optimized for a fast offline demo. No server, package install, account, or network connection is required after the repository is downloaded.
 
