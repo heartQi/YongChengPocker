@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node tests/game.test.js",
+    "build:sites": "node scripts/build-sites.mjs",
     "serve": "python3 -m http.server 4173"
   },
   "keywords": [
