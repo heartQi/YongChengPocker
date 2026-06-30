@@ -342,17 +342,6 @@ h2 {
   box-shadow: 0 24px 70px rgba(17, 24, 39, 0.28);
 }
 
-.difficulty-panel h2 {
-  margin-bottom: 8px;
-  font-size: clamp(30px, 5vw, 42px);
-}
-
-.start-note {
-  margin-bottom: 18px;
-  color: var(--muted);
-  font-weight: 800;
-}
-
 .start-game-button {
   display: block;
   width: min(240px, 100%);
