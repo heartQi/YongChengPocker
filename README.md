@@ -4,7 +4,7 @@
 
 Hosted playable demo:
 
-[Open 永城扑克 from GitLab Pages](http://mervinqi-yongchengpoker.pages.git.ringcentral.com/)
+[Open 永城扑克 from GitLab Pages](http://mervinqi-yongchengpoker-137854.pages.git.ringcentral.com)
 
 Repository:
 
