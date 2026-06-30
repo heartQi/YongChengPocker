@@ -43,6 +43,7 @@ const difficultyScreen = document.querySelector("#difficultyScreen");
 const startGameButton = document.querySelector("#startGameButton");
 const speedSelect = document.querySelector("#speedSelect");
 const difficultySelect = document.querySelector("#difficultySelect");
+const fullscreenButton = document.querySelector("#fullscreenButton");
 const victoryScreen = document.querySelector("#victoryScreen");
 const victoryTitle = document.querySelector("#victoryTitle");
 const victoryDetail = document.querySelector("#victoryDetail");
@@ -121,6 +122,14 @@ speedSelect.addEventListener("change", () => {
   if (aiTimer) scheduleAiStep();
 });
 
+fullscreenButton.addEventListener("click", async () => {
+  await enterFullscreenLandscape();
+});
+
+document.addEventListener("fullscreenchange", () => {
+  fullscreenButton.textContent = document.fullscreenElement ? "退出全屏" : "横屏全屏";
+});
+
 passButton.addEventListener("click", () => {
   selectedCardId = null;
   if (state.status === "defense-choice" && state.defenderId === 0) {
@@ -134,6 +143,22 @@ passButton.addEventListener("click", () => {
     scheduleAiStep();
   }
 });
+
+async function enterFullscreenLandscape() {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    await document.documentElement.requestFullscreen?.();
+    if (screen.orientation?.lock) {
+      await screen.orientation.lock("landscape").catch(() => {});
+    }
+  } catch {
+    fullscreenButton.blur();
+  }
+}
 
 takeButton.addEventListener("click", () => {
   selectedCardId = null;

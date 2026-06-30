@@ -144,6 +144,10 @@ h2 {
   box-shadow: 0 3px 0 #6f3c10;
 }
 
+.fullscreen-button {
+  display: none;
+}
+
 .speed-control,
 .difficulty-control {
   min-height: 30px;
@@ -681,7 +685,7 @@ h2 {
   min-height: 0;
   padding: 12px 146px 12px 12px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, 112px);
+  grid-template-columns: repeat(auto-fit, 96px);
   place-content: center;
   place-items: center;
   gap: 10px;
@@ -711,7 +715,7 @@ h2 {
 }
 
 .battle-pair {
-  min-height: 142px;
+  min-height: 128px;
   padding: 7px;
   border: 2px solid rgba(255, 247, 214, 0.22);
   border-radius: 8px;
@@ -883,9 +887,9 @@ button:disabled {
 }
 
 .card {
-  width: 66px;
-  height: 92px;
-  padding: 6px;
+  width: 58px;
+  height: 82px;
+  padding: 5px;
   border: 2px solid #1d2935;
   border-radius: 7px;
   background:
@@ -901,18 +905,18 @@ button:disabled {
 }
 
 .card span {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 900;
 }
 
 .card strong {
   place-self: center;
-  font-size: 28px;
+  font-size: 25px;
 }
 
 .card small {
   color: #6b7280;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
 }
 
@@ -1127,7 +1131,7 @@ button:disabled {
   .scoreboard {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 7px;
   }
 
@@ -1157,8 +1161,8 @@ button:disabled {
   }
 
   .board {
-    min-height: clamp(320px, 56svh, 470px);
-    margin: 48px 34px 54px;
+    min-height: clamp(300px, 52svh, 430px);
+    margin: 44px 28px 50px;
     border-width: 5px;
     border-radius: 30px;
   }
@@ -1170,7 +1174,7 @@ button:disabled {
 
   .table {
     padding: 52px 8px 82px;
-    grid-template-columns: repeat(auto-fit, 76px);
+    grid-template-columns: repeat(auto-fit, 66px);
     align-content: center;
     gap: 7px;
     overflow-y: auto;
@@ -1187,7 +1191,7 @@ button:disabled {
   }
 
   .battle-pair {
-    min-height: 116px;
+    min-height: 104px;
     padding: 5px;
     gap: 6px;
   }
@@ -1213,6 +1217,10 @@ button:disabled {
     min-height: 42px;
     padding: 7px 10px;
     font-size: 14px;
+  }
+
+  .fullscreen-button {
+    display: block;
   }
 
   #takeButton,
@@ -1296,7 +1304,7 @@ button:disabled {
   }
 
   .hand {
-    min-height: 88px;
+    min-height: 80px;
     margin-top: 7px;
     padding: 3px 3px 12px;
     flex-wrap: nowrap;
@@ -1312,22 +1320,22 @@ button:disabled {
   }
 
   .card {
-    width: 56px;
-    height: 78px;
+    width: 48px;
+    height: 68px;
     padding: 5px;
     border-radius: 6px;
   }
 
   .card span {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .card strong {
-    font-size: 23px;
+    font-size: 20px;
   }
 
   .card small {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .card.selected {
@@ -1391,11 +1399,11 @@ button:disabled {
 
   .board {
     min-height: 330px;
-    margin: 46px 25px 52px;
+    margin: 42px 22px 48px;
   }
 
   .table {
-    grid-template-columns: repeat(auto-fit, 68px);
+    grid-template-columns: repeat(auto-fit, 58px);
     gap: 6px;
   }
 
@@ -1411,7 +1419,196 @@ button:disabled {
   }
 
   .card {
+    width: 44px;
+    height: 64px;
+  }
+}
+
+@media (max-width: 920px) and (orientation: landscape) {
+  body {
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .game-shell {
+    height: 100svh;
+    min-height: 0;
+    padding: 6px;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 6px;
+  }
+
+  .topbar {
+    padding: 6px 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand {
+    width: auto;
+    min-width: 128px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+
+  .rules-button,
+  .top-button,
+  .speed-control,
+  .difficulty-control,
+  .scoreboard span {
+    min-height: 30px;
+    font-size: 12px;
+  }
+
+  .rules-button,
+  .top-button {
+    padding: 4px 8px;
+  }
+
+  .fullscreen-button {
+    display: block;
+  }
+
+  .scoreboard {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+  }
+
+  .scoreboard span,
+  .scoreboard label,
+  .scoreboard button {
+    width: auto;
+  }
+
+  .speed-control,
+  .difficulty-control {
+    padding: 3px 5px;
+  }
+
+  .speed-control select,
+  .difficulty-control select {
+    min-width: 62px;
+    min-height: 24px;
+    font-size: 12px;
+  }
+
+  .layout {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) 180px;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  .board {
+    min-height: 0;
+    height: 100%;
+    margin: 34px 28px 38px;
+    border-width: 4px;
+    border-radius: 24px;
+  }
+
+  .board::before {
+    inset: 10px;
+    border-radius: 18px;
+  }
+
+  .table {
+    padding: 34px 6px 54px;
+    grid-template-columns: repeat(auto-fit, 58px);
+    gap: 5px;
+  }
+
+  .battle-pair {
+    min-height: 90px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .actions {
+    inset: auto 6px 6px;
+    gap: 6px;
+  }
+
+  .actions button,
+  .play-selected-button {
+    min-width: 66px;
+    min-height: 32px;
+    padding: 4px 7px;
+    font-size: 12px;
+  }
+
+  .player-seat {
     width: 52px;
-    height: 74px;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 11px;
+  }
+
+  .log-panel {
+    max-height: none;
+    min-height: 0;
+  }
+
+  .log-panel h2 {
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+
+  .log-entry {
+    padding: 6px;
+  }
+
+  .hand-zone {
+    position: static;
+    padding: 6px 8px;
+    border-radius: 8px;
+  }
+
+  .hand-heading {
+    display: none;
+  }
+
+  .hand {
+    min-height: 64px;
+    margin-top: 0;
+    padding: 2px 2px 6px;
+    gap: 6px;
+  }
+
+  .card {
+    width: 42px;
+    height: 58px;
+    padding: 4px;
+    border-width: 1px;
+  }
+
+  .card span {
+    font-size: 11px;
+  }
+
+  .card strong {
+    font-size: 18px;
+  }
+
+  .card small {
+    font-size: 7px;
+  }
+
+  .defense-placeholder {
+    width: 52px;
+    min-height: 32px;
+    font-size: 10px;
   }
 }
