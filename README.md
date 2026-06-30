@@ -4,23 +4,23 @@
 
 Hosted playable demo:
 
-[Open 永城扑克 from GitLab Pages](http://mervinqi-yongchengpoker-137854.pages.git.ringcentral.com)
+[Open 永城扑克 from GitHub Pages](https://heartqi.github.io/YongChengPocker/)
 
 Repository:
 
-[Open the GitLab repository](https://git.ringcentral.com/rc-ai-learning/mervinqi-yongchengpoker)
+[Open the GitHub repository](https://github.com/heartQi/YongChengPocker)
 
 Deployment reference:
 
-[Latest GitLab Pages pipeline](https://git.ringcentral.com/rc-ai-learning/mervinqi-yongchengpoker/-/pipelines)
+[Latest GitHub Pages deployment](https://github.com/heartQi/YongChengPocker/actions/workflows/pages.yml)
 
 This project is also optimized for a fast offline demo. No server, package install, account, or network connection is required after the repository is downloaded.
 
 Direct local demo:
 
 1. Open `index.html` in a modern desktop browser.
-2. Choose a difficulty level.
-3. Play as A against the local AI players.
+2. Click Start.
+3. Play as A against the local AI players. The default difficulty is 困难, and you can change it from the in-game difficulty control.
 
 Optional local server:
 
@@ -93,10 +93,11 @@ npm test
 Direct run:
 
 1. Open `index.html` in a browser.
-2. Choose 简单, 较难, 困难, or 超难.
+2. Click Start.
 3. Select a legal card from your hand.
 4. Use the flashing action buttons on the table to 出牌, 收牌, 放弃追加, 不给牌, or confirm 防守成功.
-5. Use 重新开始 to return to the difficulty selector.
+5. Use the in-game 难度 control to switch between 简单, 较难, 困难, or 超难.
+6. Use 重新开始 to return to the Start screen.
 
 Optional local server:
 
