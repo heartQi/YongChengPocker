@@ -32,7 +32,6 @@ const tableEl = document.querySelector("#table");
 const playersEl = document.querySelector("#players");
 const logEl = document.querySelector("#log");
 const hintEl = document.querySelector("#hint");
-const difficultyBadgeEl = document.querySelector("#difficultyBadge");
 const trumpBadgeEl = document.querySelector("#trumpBadge");
 const stockBadgeEl = document.querySelector("#stockBadge");
 const turnBadgeEl = document.querySelector("#turnBadge");
@@ -152,8 +151,6 @@ playSelectedButton.addEventListener("click", () => {
 
 function render() {
   const trump = getSuit(state.trumpSuit);
-  const difficulty = DIFFICULTIES[state.difficulty] ?? DIFFICULTIES.normal;
-  difficultyBadgeEl.textContent = `难度：${difficulty.label}`;
   trumpBadgeEl.textContent = `主牌：${trump.symbol} ${trump.label}`;
   stockBadgeEl.textContent = `牌墩：${state.stock.length}`;
   if (turnBadgeEl) turnBadgeEl.textContent = currentTurnText();
