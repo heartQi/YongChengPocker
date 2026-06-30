@@ -1173,7 +1173,7 @@ button:disabled {
   }
 
   .table {
-    padding: 52px 8px 82px;
+    padding: 52px 8px 108px;
     grid-template-columns: repeat(auto-fit, 66px);
     align-content: center;
     gap: 7px;
@@ -1181,7 +1181,7 @@ button:disabled {
   }
 
   .table.is-empty {
-    padding: 40px 10px 72px;
+    padding: 40px 10px 98px;
   }
 
   .empty-table {
@@ -1203,9 +1203,9 @@ button:disabled {
   }
 
   .actions {
-    inset: auto 8px 9px;
+    inset: auto 10px 58px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: flex-end;
     gap: 8px;
   }
@@ -1408,13 +1408,15 @@ button:disabled {
   }
 
   .actions {
-    gap: 6px;
+    inset-inline: 8px;
+    bottom: 56px;
+    gap: 5px;
   }
 
   .actions button,
   .play-selected-button {
-    min-width: 70px;
-    padding-inline: 8px;
+    min-width: 66px;
+    padding-inline: 7px;
     font-size: 13px;
   }
 
@@ -1522,7 +1524,7 @@ button:disabled {
   }
 
   .table {
-    padding: 34px 6px 54px;
+    padding: 34px 6px 84px;
     grid-template-columns: repeat(auto-fit, 58px);
     gap: 5px;
   }
@@ -1534,7 +1536,8 @@ button:disabled {
   }
 
   .actions {
-    inset: auto 6px 6px;
+    inset: auto 8px 42px;
+    justify-content: center;
     gap: 6px;
   }
 
