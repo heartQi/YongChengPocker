@@ -1288,8 +1288,10 @@ button:disabled {
     position: sticky;
     bottom: 0;
     z-index: 6;
+    max-height: min(34svh, 230px);
     padding: 9px 10px calc(10px + env(safe-area-inset-bottom));
     border-radius: 8px 8px 0 0;
+    overflow-y: auto;
   }
 
   .hand-heading {
@@ -1308,16 +1310,16 @@ button:disabled {
     min-height: 80px;
     margin-top: 7px;
     padding: 3px 3px 12px;
-    flex-wrap: nowrap;
-    gap: 8px;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x proximity;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: flex-start;
+    gap: 8px 7px;
+    overflow: visible;
+    overscroll-behavior: contain;
   }
 
   .hand .card {
     flex: 0 0 auto;
-    scroll-snap-align: center;
   }
 
   .card {
@@ -1595,7 +1597,10 @@ button:disabled {
     min-height: 64px;
     margin-top: 0;
     padding: 2px 2px 6px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
     gap: 6px;
+    overflow-x: auto;
   }
 
   .card {
