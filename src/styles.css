@@ -1228,6 +1228,11 @@ button:disabled {
     left: 0;
   }
 
+  #passButton.is-defense-confirm {
+    right: 0;
+    left: auto;
+  }
+
   #playSelectedButton {
     right: 0;
   }
@@ -1553,6 +1558,11 @@ button:disabled {
   #takeButton,
   #passButton {
     left: 0;
+  }
+
+  #passButton.is-defense-confirm {
+    right: 0;
+    left: auto;
   }
 
   #playSelectedButton {

@@ -296,6 +296,7 @@ function updateActions() {
   passButton.hidden = !canPassOrConfirm || isChoosingDifficulty || state.status === "finished";
   takeButton.disabled = aiIsThinking || !canTake;
   takeButton.hidden = !canTake || isChoosingDifficulty || state.status === "finished";
+  playSelectedButton.hidden = canConfirmDefense || isChoosingDifficulty || state.status === "finished";
   playSelectedButton.disabled = aiIsThinking || (!canPlaySelectedCard && !shouldPromptPlayCard);
   passButton.classList.toggle("is-ready", !passButton.disabled);
   passButton.classList.toggle("is-defense-confirm", canConfirmDefense && !passButton.disabled);
