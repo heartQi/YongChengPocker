@@ -1162,7 +1162,7 @@ button:disabled {
 
   .board {
     min-height: clamp(300px, 52svh, 430px);
-    margin: 44px 28px 50px;
+    margin: 54px 56px 64px;
     border-width: 5px;
     border-radius: 30px;
   }
@@ -1173,7 +1173,7 @@ button:disabled {
   }
 
   .table {
-    padding: 52px 8px 108px;
+    padding: 52px 8px 86px;
     grid-template-columns: repeat(auto-fit, 66px);
     align-content: center;
     gap: 7px;
@@ -1181,7 +1181,7 @@ button:disabled {
   }
 
   .table.is-empty {
-    padding: 40px 10px 98px;
+    padding: 40px 10px 78px;
   }
 
   .empty-table {
@@ -1203,9 +1203,9 @@ button:disabled {
   }
 
   .actions {
-    inset: auto 10px 58px;
+    inset: auto 10px 18px;
     display: grid;
-    grid-template-columns: minmax(66px, 1fr) auto minmax(66px, 1fr);
+    grid-template-columns: minmax(66px, 1fr) minmax(66px, 1fr);
     grid-template-rows: auto;
     align-items: flex-end;
     justify-items: center;
@@ -1238,12 +1238,12 @@ button:disabled {
 
   #playSelectedButton {
     grid-column: 2;
-    justify-self: center;
+    justify-self: end;
   }
 
   #passButton {
-    grid-column: 3;
-    justify-self: end;
+    grid-column: 1;
+    justify-self: start;
   }
 
   .player-seat {
@@ -1258,23 +1258,23 @@ button:disabled {
   }
 
   .player-seat-0 {
-    bottom: 2px;
-    transform: translate(-50%, 58%);
+    bottom: -4px;
+    transform: translate(-50%, 100%);
   }
 
   .player-seat-1 {
-    right: 2px;
-    transform: translate(42%, -50%);
+    right: -4px;
+    transform: translate(100%, -50%);
   }
 
   .player-seat-2 {
-    top: 2px;
-    transform: translate(-50%, -58%);
+    top: -4px;
+    transform: translate(-50%, -100%);
   }
 
   .player-seat-3 {
-    left: 2px;
-    transform: translate(-42%, -50%);
+    left: -4px;
+    transform: translate(-100%, -50%);
   }
 
   .panel {
@@ -1414,7 +1414,7 @@ button:disabled {
 
   .board {
     min-height: 330px;
-    margin: 42px 22px 48px;
+    margin: 52px 50px 62px;
   }
 
   .table {
@@ -1424,8 +1424,8 @@ button:disabled {
 
   .actions {
     inset-inline: 8px;
-    bottom: 56px;
-    grid-template-columns: minmax(62px, 1fr) auto minmax(62px, 1fr);
+    bottom: 16px;
+    grid-template-columns: minmax(62px, 1fr) minmax(62px, 1fr);
     gap: 5px;
   }
 
@@ -1529,7 +1529,7 @@ button:disabled {
   .board {
     min-height: 0;
     height: 100%;
-    margin: 34px 28px 38px;
+    margin: 32px 44px 38px;
     border-width: 4px;
     border-radius: 24px;
   }
@@ -1540,7 +1540,7 @@ button:disabled {
   }
 
   .table {
-    padding: 34px 6px 84px;
+    padding: 34px 6px 58px;
     grid-template-columns: repeat(auto-fit, 58px);
     gap: 5px;
   }
@@ -1552,8 +1552,8 @@ button:disabled {
   }
 
   .actions {
-    inset: auto 8px 42px;
-    grid-template-columns: minmax(58px, 1fr) auto minmax(58px, 1fr);
+    inset: auto 8px 8px;
+    grid-template-columns: minmax(58px, 1fr) minmax(58px, 1fr);
     justify-items: center;
     gap: 6px;
   }
@@ -1564,6 +1564,23 @@ button:disabled {
     min-height: 32px;
     padding: 4px 7px;
     font-size: 12px;
+  }
+
+  #takeButton,
+  #passButton,
+  #playSelectedButton {
+    grid-row: 1;
+  }
+
+  #takeButton,
+  #passButton {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  #playSelectedButton {
+    grid-column: 2;
+    justify-self: end;
   }
 
   .player-seat {
