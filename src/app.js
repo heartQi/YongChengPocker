@@ -285,13 +285,15 @@ function updateActions() {
   const canConfirmDefense = state.status === "defense-choice" && state.defenderId === 0;
   const aiIsThinking = Boolean(aiTimer);
   const canTake = canTakeCards(state, 0);
+  const canPassOrConfirm = canConfirmDefense || canPassAttack(state, 0);
   const card = selectedCard();
   const canPlaySelectedCard = Boolean(card && isHumanCardLegal(card));
   const shouldPromptPlayCard = shouldPromptForPlayableCard();
   passButton.textContent = canConfirmDefense ? "防守成功" : state.status === "collecting" ? "不给牌" : "放弃追加";
   takeButton.textContent = "收牌";
   playSelectedButton.textContent = selectedPlayLabel();
-  passButton.disabled = aiIsThinking || (!canConfirmDefense && !canPassAttack(state, 0));
+  passButton.disabled = aiIsThinking || !canPassOrConfirm;
+  passButton.hidden = !canPassOrConfirm || isChoosingDifficulty || state.status === "finished";
   takeButton.disabled = aiIsThinking || !canTake;
   takeButton.hidden = !canTake || isChoosingDifficulty || state.status === "finished";
   playSelectedButton.disabled = aiIsThinking || (!canPlaySelectedCard && !shouldPromptPlayCard);
