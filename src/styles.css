@@ -1204,16 +1204,14 @@ button:disabled {
 
   .actions {
     inset: auto 10px 18px;
-    display: grid;
-    grid-template-columns: minmax(66px, 1fr) minmax(66px, 1fr);
-    grid-template-rows: auto;
-    align-items: flex-end;
-    justify-items: center;
-    gap: 8px;
+    display: block;
+    min-height: 46px;
   }
 
   .actions button,
   .play-selected-button {
+    position: absolute;
+    bottom: 0;
     width: auto;
     min-width: 78px;
     min-height: 42px;
@@ -1226,24 +1224,12 @@ button:disabled {
   }
 
   #takeButton,
-  #passButton,
-  #playSelectedButton {
-    grid-row: 1;
-  }
-
-  #takeButton {
-    grid-column: 1;
-    justify-self: start;
-  }
-
-  #playSelectedButton {
-    grid-column: 2;
-    justify-self: end;
-  }
-
   #passButton {
-    grid-column: 1;
-    justify-self: start;
+    left: 0;
+  }
+
+  #playSelectedButton {
+    right: 0;
   }
 
   .player-seat {
@@ -1425,8 +1411,6 @@ button:disabled {
   .actions {
     inset-inline: 8px;
     bottom: 16px;
-    grid-template-columns: minmax(62px, 1fr) minmax(62px, 1fr);
-    gap: 5px;
   }
 
   .actions button,
@@ -1553,9 +1537,7 @@ button:disabled {
 
   .actions {
     inset: auto 8px 8px;
-    grid-template-columns: minmax(58px, 1fr) minmax(58px, 1fr);
-    justify-items: center;
-    gap: 6px;
+    min-height: 34px;
   }
 
   .actions button,
@@ -1567,20 +1549,12 @@ button:disabled {
   }
 
   #takeButton,
-  #passButton,
-  #playSelectedButton {
-    grid-row: 1;
-  }
-
-  #takeButton,
   #passButton {
-    grid-column: 1;
-    justify-self: start;
+    left: 0;
   }
 
   #playSelectedButton {
-    grid-column: 2;
-    justify-self: end;
+    right: 0;
   }
 
   .player-seat {
