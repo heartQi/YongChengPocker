@@ -20,7 +20,7 @@ Direct local demo:
 
 1. Open `index.html` in a modern desktop browser.
 2. Click Start.
-3. Play as A against the local AI players. The default difficulty is 困难, and you can change it from the in-game difficulty control.
+3. Play as 东 against the local AI players. The default difficulty is 困难, and you can change it from the in-game difficulty control.
 
 Optional local server:
 
@@ -42,7 +42,7 @@ The playable UI is fully Chinese. The source and documentation are kept small en
 
 ## Game description
 
-The game uses a 54-card deck including big and small jokers. Four players sit in order as A, B, C, and D. A/C are partners, and B/D are partners. The human player controls A, with C as the AI partner against B and D.
+The game uses a 54-card deck including big and small jokers. Four players sit in order as 东, 南, 西, and 北. 东/西 are partners, and 南/北 are partners. The human player controls 东, with 西 as the AI partner against 南 and 北.
 
 Before opening hands are dealt, one random suited card is selected as the trump marker and inserted into the first 32 cards. Whoever receives that card becomes the first defender, and that card's suit is trump. Each player starts with eight cards.
 

@@ -450,7 +450,7 @@ function updateVictory() {
 }
 
 function currentTurnText() {
-  if (state.status === "finished") return `胜方：${state.winnerTeam === 0 ? "A/C" : "B/D"} 阵营`;
+  if (state.status === "finished") return `胜方：${state.winnerTeam === 0 ? "东/西" : "南/北"} 阵营`;
   if (!selectedDifficulty) return "点击 Start 开始";
   if (needsHumanInput()) return humanTurnText();
   if (state.status === "defense-choice") return "防守成功待确认";

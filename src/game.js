@@ -10,7 +10,7 @@ export const JOKERS = [
   { id: "small-joker", rank: "小王", rankValue: 15, suit: "joker", suitSymbol: "王", color: "black", isJoker: true },
   { id: "big-joker", rank: "大王", rankValue: 16, suit: "joker", suitSymbol: "王", color: "red", isJoker: true }
 ];
-const PLAYER_NAMES = ["A / 你", "B", "C / 队友", "D"];
+const PLAYER_NAMES = ["东 / 你", "南", "西 / 队友", "北"];
 const HAND_LIMIT = 8;
 
 export const DIFFICULTIES = {
@@ -500,7 +500,7 @@ function checkWin(state) {
     state.winnerTeam = winner.team;
     state.winnerId = winner.id;
     state.status = "finished";
-    addLog(state, createLogEntry("胜利", `${winner.name} 玩家胜利`, `${winner.team === 0 ? "A/C" : "B/D"} 阵营获胜`));
+    addLog(state, createLogEntry("胜利", `${winner.name} 玩家胜利`, `${winner.team === 0 ? "东/西" : "南/北"} 阵营获胜`));
   }
 }
 
