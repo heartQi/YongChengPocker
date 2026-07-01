@@ -118,11 +118,28 @@ Controls:
 - 游戏规则: open the in-game rule summary.
 - 重新开始: return to difficulty selection.
 
+## WeChat Mini Program
+
+A native WeChat Mini Program version is included in `miniprogram/`.
+
+To preview it:
+
+1. Open WeChat Developer Tools.
+2. Import the `miniprogram/` folder as the project root.
+3. Use a real AppID for publishing, or the tourist AppID for local preview.
+4. Run the `pages/game/game` page.
+
 ## Project structure
 
 ```text
 .
 ├── index.html
+├── miniprogram/
+│   ├── app.json
+│   ├── app.js
+│   ├── app.wxss
+│   ├── pages/game/
+│   └── utils/game.js
 ├── docs/
 │   └── screenshot-game.png
 ├── src/

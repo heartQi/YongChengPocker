@@ -1,0 +1,94 @@
+<view class="game-shell">
+  <view class="topbar">
+    <view class="brand">
+      <text class="title">永城扑克</text>
+      <button class="rule-button" bindtap="toggleRules">规则</button>
+    </view>
+    <view class="badges">
+      <text class="badge">主牌：{{trumpText}}</text>
+      <text class="badge">牌墩：{{stockCount}}</text>
+      <picker mode="selector" range="{{difficultyOptions}}" range-key="label" value="{{difficultyIndex}}" bindchange="changeDifficulty">
+        <view class="select">难度 {{difficultyLabel}}</view>
+      </picker>
+      <button class="restart-button" bindtap="restart">重新开始</button>
+    </view>
+  </view>
+
+  <view wx:if="{{!started}}" class="start-screen">
+    <view class="start-panel">
+      <view class="start-title">永城扑克</view>
+      <view class="start-suits">♠ ♥ ♣ ♦</view>
+      <button class="start-button" bindtap="startGame">Start</button>
+    </view>
+  </view>
+
+  <view class="board">
+    <view wx:for="{{players}}" wx:key="id" class="seat seat-{{item.id}} {{item.roleClass}}">
+      <text class="avatar">{{item.shortName}}/{{item.handCount}}</text>
+    </view>
+
+    <view class="table {{battle.length === 0 ? 'is-empty' : ''}}">
+      <view wx:if="{{battle.length === 0}}" class="empty-table">{{statusText}}</view>
+      <view wx:for="{{battle}}" wx:key="index" class="battle-pair">
+        <view class="mini-card {{item.attack.color}} {{item.attack.isTrump ? 'trump' : ''}}">
+          <text>{{item.attack.rank}}</text>
+          <text class="suit">{{item.attack.suitSymbol}}</text>
+          <text class="caption">{{item.attackCaption}}</text>
+        </view>
+        <view wx:if="{{item.defense}}" class="mini-card {{item.defense.color}} {{item.defense.isTrump ? 'trump' : ''}}">
+          <text>{{item.defense.rank}}</text>
+          <text class="suit">{{item.defense.suitSymbol}}</text>
+          <text class="caption">{{item.defenseCaption}}</text>
+        </view>
+        <view wx:else class="defense-placeholder">待防守</view>
+      </view>
+    </view>
+
+    <view class="actions">
+      <button wx:if="{{showTake}}" class="action-button left {{takeReady ? 'ready' : ''}}" disabled="{{takeDisabled}}" bindtap="takeCards">收牌</button>
+      <button wx:if="{{showPass}}" class="action-button {{passSide}} {{passReady ? 'ready' : ''}}" disabled="{{passDisabled}}" bindtap="passAction">{{passLabel}}</button>
+      <button wx:if="{{showPlay}}" class="action-button right {{playReady ? 'ready' : ''}}" disabled="{{playDisabled}}" bindtap="playSelected">{{playLabel}}</button>
+    </view>
+  </view>
+
+  <view class="hand-zone">
+    <view class="hand-heading">
+      <text class="hand-title">你的手牌</text>
+      <text class="hint">{{hint}}</text>
+    </view>
+    <view class="hand">
+      <button wx:for="{{hand}}" wx:key="id" class="card {{item.color}} {{item.isTrump ? 'trump' : ''}} {{item.isSelected ? 'selected' : ''}}" disabled="{{item.disabled}}" data-id="{{item.id}}" bindtap="selectCard">
+        <text>{{item.rank}}</text>
+        <text class="suit">{{item.suitSymbol}}</text>
+        <text class="caption">{{item.caption}}</text>
+      </button>
+    </view>
+  </view>
+
+  <view class="log-panel">
+    <view class="log-summary" bindtap="toggleLog">回合记录 <text>{{logOpen ? '收起' : '展开'}}</text></view>
+    <view wx:if="{{logOpen}}" class="log">
+      <view wx:for="{{logs}}" wx:key="index" class="log-entry">
+        <text class="log-type">{{item.type}}</text>
+        <text class="log-main">{{item.main}}</text>
+        <text wx:if="{{item.detail}}" class="log-detail">{{item.detail}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{rulesOpen}}" class="modal" bindtap="toggleRules">
+    <view class="rules" catchtap="noop">
+      <view class="rules-title">游戏规则</view>
+      <view class="rules-text">东/西一队，南/北一队。攻击方出牌，防守方需要用同花色更大的牌、主牌或大小王防守。防守成功后成为下一轮进攻方；收牌按防守失败处理。</view>
+      <button class="close-button" bindtap="toggleRules">关闭</button>
+    </view>
+  </view>
+
+  <view wx:if="{{victoryOpen}}" class="modal">
+    <view class="rules">
+      <view class="rules-title">{{victoryTitle}}</view>
+      <view class="rules-text">{{victoryDetail}}</view>
+      <button class="close-button" bindtap="nextRound">下一局</button>
+    </view>
+  </view>
+</view>

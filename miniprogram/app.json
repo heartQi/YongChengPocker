@@ -1,0 +1,11 @@
+{
+  "pages": ["pages/game/game"],
+  "window": {
+    "navigationBarTitleText": "永城扑克",
+    "navigationBarBackgroundColor": "#071511",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#071511"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
