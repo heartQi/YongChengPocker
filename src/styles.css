@@ -1318,13 +1318,17 @@ button:disabled {
     flex-wrap: wrap;
     justify-content: center;
     align-content: flex-start;
-    gap: 8px 7px;
+    gap: 7px 6px;
     overflow: visible;
     overscroll-behavior: contain;
   }
 
   .hand .card {
-    flex: 0 0 auto;
+    flex: 0 0 calc((100% - 42px) / 8);
+    width: calc((100% - 42px) / 8);
+    max-width: 48px;
+    height: auto;
+    aspect-ratio: 48 / 68;
   }
 
   .card {
