@@ -30,6 +30,7 @@ let selectedCardId = null;
 const handEl = document.querySelector("#hand");
 const tableEl = document.querySelector("#table");
 const playersEl = document.querySelector("#players");
+const logPanel = document.querySelector("#logPanel");
 const logEl = document.querySelector("#log");
 const hintEl = document.querySelector("#hint");
 const trumpBadgeEl = document.querySelector("#trumpBadge");
@@ -51,6 +52,14 @@ const nextRoundButton = document.querySelector("#nextRoundButton");
 const rulesButton = document.querySelector("#rulesButton");
 const rulesScreen = document.querySelector("#rulesScreen");
 const rulesCloseButton = document.querySelector("#rulesCloseButton");
+const mobileLayoutQuery = window.matchMedia("(max-width: 920px)");
+
+function syncLogPanelForViewport() {
+  logPanel.open = !mobileLayoutQuery.matches;
+}
+
+syncLogPanelForViewport();
+mobileLayoutQuery.addEventListener("change", syncLogPanelForViewport);
 
 restartButton.addEventListener("click", () => {
   clearAiTimer();
