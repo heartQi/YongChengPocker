@@ -1356,18 +1356,18 @@ button:disabled {
     min-height: 80px;
     margin-top: 7px;
     padding: 3px 3px 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    align-items: end;
     gap: 7px 6px;
     overflow: visible;
     overscroll-behavior: contain;
   }
 
   .hand .card {
-    flex: 0 0 calc((100% - 42px) / 8);
-    width: calc((100% - 42px) / 8);
-    max-width: 48px;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
     height: auto;
     aspect-ratio: 48 / 68;
   }
@@ -1670,6 +1670,7 @@ button:disabled {
   }
 
   .hand {
+    display: flex;
     min-height: 64px;
     margin-top: 0;
     padding: 2px 2px 6px;
