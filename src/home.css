@@ -1,0 +1,324 @@
+:root {
+  --felt: #0f6b52;
+  --felt-deep: #063d31;
+  --gold: #e2b34a;
+  --gold-bright: #f3d27a;
+  --ink: #f6ecd0;
+  --muted: rgba(246, 236, 208, 0.72);
+  --bg-0: #06120f;
+  --bg-1: #0a1f1a;
+  --crimson: #b83a3a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow-x: hidden;
+  color: var(--ink);
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg-0);
+}
+
+.home-atmosphere {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 110%, rgba(15, 107, 82, 0.55), transparent 55%),
+    radial-gradient(circle at 50% 0%, rgba(226, 179, 74, 0.18), transparent 42%),
+    linear-gradient(165deg, #040d0b 0%, #0a1c17 48%, #071411 100%);
+}
+
+.home-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.55;
+  animation: glow-drift 12s ease-in-out infinite alternate;
+}
+
+.home-glow-a {
+  width: min(48vw, 420px);
+  height: min(48vw, 420px);
+  left: -8%;
+  top: 18%;
+  background: rgba(226, 179, 74, 0.22);
+}
+
+.home-glow-b {
+  width: min(52vw, 460px);
+  height: min(52vw, 460px);
+  right: -10%;
+  bottom: 8%;
+  background: rgba(15, 107, 82, 0.35);
+  animation-delay: -4s;
+}
+
+.home-felt {
+  position: absolute;
+  left: 50%;
+  bottom: -18%;
+  width: min(140vw, 1100px);
+  height: min(70vw, 520px);
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(31, 140, 105, 0.55), transparent 62%),
+    radial-gradient(ellipse at 50% 55%, var(--felt) 0%, var(--felt-deep) 70%);
+  box-shadow:
+    0 0 0 10px rgba(226, 179, 74, 0.12),
+    0 0 0 14px rgba(0, 0, 0, 0.35),
+    inset 0 20px 60px rgba(0, 0, 0, 0.35);
+  animation: felt-pulse 8s ease-in-out infinite;
+}
+
+.home-particles span {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold-bright);
+  opacity: 0;
+  animation: particle-rise 7s linear infinite;
+}
+
+.home-particles span:nth-child(1) { left: 12%; bottom: 10%; animation-delay: 0s; }
+.home-particles span:nth-child(2) { left: 28%; bottom: 6%; animation-delay: 1.2s; width: 4px; height: 4px; }
+.home-particles span:nth-child(3) { left: 45%; bottom: 12%; animation-delay: 2.1s; }
+.home-particles span:nth-child(4) { left: 58%; bottom: 4%; animation-delay: 0.6s; width: 5px; height: 5px; }
+.home-particles span:nth-child(5) { left: 72%; bottom: 14%; animation-delay: 3s; }
+.home-particles span:nth-child(6) { left: 84%; bottom: 8%; animation-delay: 1.8s; width: 3px; height: 3px; }
+.home-particles span:nth-child(7) { left: 36%; bottom: 2%; animation-delay: 4.2s; }
+.home-particles span:nth-child(8) { left: 66%; bottom: 16%; animation-delay: 5s; width: 4px; height: 4px; }
+
+.home-shell {
+  position: relative;
+  z-index: 1;
+  width: min(920px, 100%);
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: clamp(28px, 6vh, 56px) 20px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(28px, 5vh, 48px);
+}
+
+.home-brand {
+  text-align: center;
+  animation: brand-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.home-kicker {
+  margin: 0 0 10px;
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.home-title {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.home-title-mark {
+  font-family: "ZCOOL QingKe HuangYou", "Noto Sans SC", sans-serif;
+  font-size: clamp(64px, 14vw, 108px);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  background: linear-gradient(180deg, #fff6d4 0%, var(--gold) 48%, #b8862a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  filter: drop-shadow(0 2px 0 rgba(90, 60, 10, 0.35));
+}
+
+.home-title-sub {
+  font-family: "ZCOOL QingKe HuangYou", "Noto Sans SC", sans-serif;
+  font-size: clamp(28px, 6vw, 40px);
+  letter-spacing: 0.42em;
+  color: var(--ink);
+  padding-left: 0.42em;
+}
+
+.home-lead {
+  margin: 16px 0 0;
+  font-size: clamp(15px, 2.4vw, 18px);
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.home-games {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  animation: portals-in 1s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.game-portal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 210px;
+  padding: 28px 26px 24px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(226, 179, 74, 0.45);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.07), transparent 42%),
+    linear-gradient(160deg, rgba(18, 56, 46, 0.95), rgba(8, 28, 23, 0.98));
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.game-portal:hover,
+.game-portal:focus-visible {
+  transform: translateY(-6px) scale(1.02);
+  border-color: var(--gold-bright);
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(226, 179, 74, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  outline: none;
+}
+
+.portal-yongcheng {
+  --accent: #3d8f72;
+}
+
+.portal-zhajinhua {
+  --accent: var(--crimson);
+}
+
+.portal-suit {
+  position: absolute;
+  right: 18px;
+  top: 14px;
+  font-size: 72px;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.28;
+  transform: rotate(8deg);
+  transition: transform 0.45s ease, opacity 0.45s ease;
+}
+
+.game-portal:hover .portal-suit {
+  opacity: 0.45;
+  transform: rotate(0deg) scale(1.08);
+}
+
+.portal-label {
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.portal-name {
+  font-family: "ZCOOL QingKe HuangYou", "Noto Sans SC", sans-serif;
+  font-size: clamp(32px, 5vw, 42px);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+
+.portal-desc {
+  margin-top: auto;
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.portal-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.12) 48%, transparent 62%);
+  transform: translateX(-120%);
+  animation: shine-sweep 4.5s ease-in-out infinite;
+}
+
+.portal-zhajinhua .portal-shine {
+  animation-delay: 1.2s;
+}
+
+@keyframes brand-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes portals-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes glow-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(24px, -18px) scale(1.08); }
+}
+
+@keyframes felt-pulse {
+  0%, 100% { opacity: 0.85; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.03); }
+}
+
+@keyframes particle-rise {
+  0% { opacity: 0; transform: translateY(0) scale(0.6); }
+  15% { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(-70vh) scale(1); }
+}
+
+@keyframes shine-sweep {
+  0%, 60% { transform: translateX(-120%); }
+  85%, 100% { transform: translateX(120%); }
+}
+
+@media (max-width: 720px) {
+  .home-games {
+    grid-template-columns: 1fr;
+  }
+
+  .game-portal {
+    min-height: 168px;
+  }
+
+  .home-title-sub {
+    letter-spacing: 0.28em;
+    padding-left: 0.28em;
+  }
+}

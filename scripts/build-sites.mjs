@@ -7,9 +7,15 @@ const server = path.join(dist, "server");
 
 const textFiles = [
   ["index.html", "text/html; charset=utf-8"],
+  ["yongcheng.html", "text/html; charset=utf-8"],
+  ["zhajinhua.html", "text/html; charset=utf-8"],
   ["src/app.js", "text/javascript; charset=utf-8"],
   ["src/game.js", "text/javascript; charset=utf-8"],
-  ["src/styles.css", "text/css; charset=utf-8"]
+  ["src/styles.css", "text/css; charset=utf-8"],
+  ["src/home.css", "text/css; charset=utf-8"],
+  ["src/zhajinhua/app.js", "text/javascript; charset=utf-8"],
+  ["src/zhajinhua/game.js", "text/javascript; charset=utf-8"],
+  ["src/zhajinhua/styles.css", "text/css; charset=utf-8"]
 ];
 
 const assets = Object.fromEntries(

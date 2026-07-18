@@ -1,26 +1,34 @@
-# 永城扑克
+# PGame 纸牌馆
+
+浏览器离线纸牌合集：**永城扑克**、**炸金花**。打开主页后选择要玩的游戏。
 
 ## Quick demo
 
-Hosted playable demo:
+Hosted playable demo（点开即玩，进入游戏主页）：
 
-[Open 永城扑克 from GitHub Pages](https://heartqi.github.io/YongChengPocker/)
+[Open PGame 纸牌馆 from GitHub Pages](https://heartqi.github.io/PGame/)
+
+也可直达某一玩法：
+
+- [永城扑克](https://heartqi.github.io/PGame/yongcheng.html)
+- [炸金花](https://heartqi.github.io/PGame/zhajinhua.html)
 
 Repository:
 
-[Open the GitHub repository](https://github.com/heartQi/YongChengPocker)
+[Open the GitHub repository](https://github.com/heartQi/PGame)
 
 Deployment reference:
 
-[Latest GitHub Pages deployment](https://github.com/heartQi/YongChengPocker/actions/workflows/pages.yml)
+[Latest GitHub Pages deployment](https://github.com/heartQi/PGame/actions/workflows/pages.yml)
 
 This project is also optimized for a fast offline demo. No server, package install, account, or network connection is required after the repository is downloaded.
 
 Direct local demo:
 
-1. Open `index.html` in a modern desktop browser.
-2. Click Start.
-3. Play as 东 against the local AI players. The default difficulty is 困难, and you can change it from the in-game difficulty control.
+1. Open `index.html` in a modern desktop browser（游戏主页）.
+2. Choose **永城扑克** or **炸金花** from the home screen.
+3. For 永城扑克: click Start and play as 东 against local AI (default difficulty 困难).
+4. For 炸金花: pick player count / 3 or 5 cards, then start.
 
 Optional local server:
 
@@ -92,12 +100,9 @@ npm test
 
 Direct run:
 
-1. Open `index.html` in a browser.
-2. Click Start.
-3. Select a legal card from your hand.
-4. Use the flashing action buttons on the table to 出牌, 收牌, 放弃追加, 不给牌, or confirm 防守成功.
-5. Use the in-game 难度 control to switch between 简单, 较难, 困难, or 超难.
-6. Use 重新开始 to return to the Start screen.
+1. Open `index.html` and pick a game.
+2. **永城扑克** (`yongcheng.html`): Start → select cards → use table actions (出牌 / 收牌 / 放弃追加 / 防守成功).
+3. **炸金花** (`zhajinhua.html`): set seats & card count → 闷跟 / 看牌 / 加注 / 比牌 / 弃牌.
 
 Optional local server:
 
@@ -133,23 +138,15 @@ To preview it:
 
 ```text
 .
-├── index.html
-├── miniprogram/
-│   ├── app.json
-│   ├── app.js
-│   ├── app.wxss
-│   ├── pages/game/
-│   └── utils/game.js
-├── docs/
-│   └── screenshot-game.png
+├── index.html              # 纸牌馆首页
+├── yongcheng.html          # 永城扑克
+├── zhajinhua.html          # 炸金花
 ├── src/
-│   ├── app.js
-│   ├── game.js
-│   └── styles.css
+│   ├── home.css
+│   ├── app.js / game.js / styles.css
+│   └── zhajinhua/
 ├── tests/
-│   └── game.test.js
-├── SPEC.md
-├── ARCHITECTURE.md
-├── RETROSPECTIVE.md
-└── README.md
+│   ├── game.test.js
+│   └── zhajinhua.test.js
+└── miniprogram/            # 永城扑克小程序镜像
 ```

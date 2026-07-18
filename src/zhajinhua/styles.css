@@ -1,0 +1,916 @@
+:root {
+  --ink: #f6ecd0;
+  --muted: rgba(246, 236, 208, 0.7);
+  --gold: #e2b34a;
+  --gold-bright: #f3d27a;
+  --felt: #147a5c;
+  --felt-deep: #0b4a3a;
+  --table-rim: #1a1410;
+  --bg: #1a0f24;
+  --danger: #c94a4a;
+  --ok: #3cb37a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(80, 40, 90, 0.45), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(20, 80, 60, 0.25), transparent 40%),
+    linear-gradient(180deg, #140a1c 0%, #1c1028 45%, #0d0814 100%);
+}
+
+button,
+select {
+  font: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.zjh-shell {
+  height: 100vh;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.zjh-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.zjh-home {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.zjh-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold-bright);
+}
+
+.zjh-icon-btn {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(226, 179, 74, 0.4);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.zjh-table-wrap {
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+
+.zjh-table {
+  position: relative;
+  width: min(100%, 420px);
+  aspect-ratio: 3 / 4.1;
+  border-radius: 50% / 42%;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(40, 160, 120, 0.35), transparent 55%),
+    radial-gradient(ellipse at 50% 50%, var(--felt) 0%, var(--felt-deep) 78%);
+  box-shadow:
+    0 0 0 8px #2a2118,
+    0 0 0 11px rgba(226, 179, 74, 0.55),
+    0 0 0 16px #120e0a,
+    0 24px 50px rgba(0, 0, 0, 0.55),
+    inset 0 0 40px rgba(0, 0, 0, 0.28);
+}
+
+.zjh-seats {
+  position: absolute;
+  inset: 0;
+}
+
+.zjh-seat {
+  position: absolute;
+  width: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transform: translate(-50%, -50%);
+  transition: filter 0.2s ease;
+}
+
+.zjh-seat.is-turn .zjh-avatar {
+  box-shadow: 0 0 0 2px var(--gold-bright), 0 0 16px rgba(226, 179, 74, 0.55);
+}
+
+.zjh-seat.is-folded {
+  filter: grayscale(0.7) brightness(0.75);
+}
+
+.zjh-seat.is-human {
+  z-index: 2;
+}
+
+.zjh-name {
+  font-size: 12px;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.zjh-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  border: 2px solid var(--gold);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.15), transparent),
+    linear-gradient(160deg, #3a2a18, #1a120c);
+  display: grid;
+  place-items: center;
+  font-family: "ZCOOL QingKe HuangYou", sans-serif;
+  font-size: 22px;
+  color: var(--gold-bright);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+}
+
+.zjh-chips-bal {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffe9a8;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.zjh-mini-hand {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  position: relative;
+  min-height: 44px;
+  max-width: 120px;
+  align-items: center;
+}
+
+.zjh-card-back,
+.zjh-card-face {
+  width: 28px;
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+}
+
+.zjh-card-back {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.35) 0 28%, transparent 30%),
+    linear-gradient(145deg, #4a7ec8, #2a4f8f);
+}
+
+.zjh-card-face {
+  background: #f7f3e8;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.zjh-card-face.red {
+  color: #c0392b;
+}
+
+.zjh-hand-banner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 48px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.zjh-hand-banner.is-look {
+  color: var(--gold-bright);
+  background: rgba(0, 0, 0, 0.55);
+  text-shadow: 0 0 6px rgba(226, 179, 74, 0.5);
+}
+
+.zjh-hand-banner.is-fold {
+  color: #fff;
+  background: rgba(40, 40, 40, 0.7);
+}
+
+.zjh-pot-area {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.zjh-chips {
+  position: relative;
+  height: 54px;
+  margin-bottom: 4px;
+}
+
+.zjh-chip {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-weight: 900;
+  color: #1a1208;
+  border: 2px dashed rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
+  animation: chip-pop 0.45s ease both;
+}
+
+.zjh-chip.gold { background: radial-gradient(circle at 35% 30%, #ffe08a, #d4a017); }
+.zjh-chip.silver { background: radial-gradient(circle at 35% 30%, #f0f0f0, #9aa0a6); }
+.zjh-chip.bronze { background: radial-gradient(circle at 35% 30%, #f0c090, #b87333); }
+
+.zjh-pot-amount {
+  font-family: "ZCOOL QingKe HuangYou", sans-serif;
+  font-size: 22px;
+  color: var(--gold-bright);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.zjh-turn-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.zjh-hand-panel {
+  border: 1px solid rgba(226, 179, 74, 0.35);
+  border-radius: 12px;
+  padding: 10px;
+  background: linear-gradient(180deg, rgba(30, 20, 40, 0.92), rgba(16, 10, 24, 0.96));
+}
+
+.zjh-my-cards {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  min-height: 88px;
+  margin-bottom: 8px;
+}
+
+.zjh-my-card {
+  width: 58px;
+  height: 84px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  padding: 0;
+}
+
+.zjh-my-card.back {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.4) 0 26%, transparent 28%),
+    linear-gradient(145deg, #5a8fd4, #2f5699);
+}
+
+.zjh-my-card.face {
+  background: #f8f4ea;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-weight: 900;
+}
+
+.zjh-my-card.face .rank {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.zjh-my-card.face .suit {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.zjh-my-card.face.red {
+  color: #c0392b;
+}
+
+.zjh-my-card.selected {
+  transform: translateY(-10px);
+  box-shadow: 0 0 0 2px var(--gold-bright), 0 10px 18px rgba(0, 0, 0, 0.35);
+}
+
+.zjh-my-card:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.zjh-hint {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 1.2em;
+}
+
+.zjh-bet-sizer {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(226, 179, 74, 0.35);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.zjh-bet-sizer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.zjh-bet-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zjh-bet-input-wrap input {
+  width: 120px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 179, 74, 0.55);
+  background: #120e18;
+  color: var(--gold-bright);
+  font-family: "ZCOOL QingKe HuangYou", "Noto Sans SC", sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  text-align: right;
+}
+
+.zjh-bet-input-wrap input:focus {
+  outline: none;
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 0 2px rgba(226, 179, 74, 0.25);
+}
+
+.zjh-bet-input-hint {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.zjh-bet-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.zjh-chip-pick {
+  min-width: 58px;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 17px;
+  border: 1px solid rgba(226, 179, 74, 0.4);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12), transparent 50%),
+    linear-gradient(180deg, #3a2a18, #1a120c);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.zjh-chip-pick.is-selected {
+  border-color: var(--gold-bright);
+  color: #1a1208;
+  background: linear-gradient(180deg, #ffe08a, #d4a017);
+  box-shadow: 0 0 0 1px rgba(226, 179, 74, 0.35);
+}
+
+.zjh-bet-stepper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.zjh-bet-stepper button {
+  min-height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.zjh-bet-stepper button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.zjh-bet-confirm {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 900;
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  color: #1a1208;
+  background: linear-gradient(180deg, #ffe08a, #d4a017);
+  box-shadow: 0 8px 18px rgba(212, 160, 23, 0.35);
+}
+
+.zjh-bet-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.zjh-bet-confirm.is-ready:not(:disabled) {
+  animation: bet-confirm-pulse 1.4s ease-in-out infinite;
+}
+
+.zjh-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.zjh-actions button {
+  min-height: 40px;
+  border: 1px solid rgba(226, 179, 74, 0.4);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(60, 44, 28, 0.95), rgba(28, 20, 14, 0.98));
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+@keyframes bet-confirm-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 8px 18px rgba(212, 160, 23, 0.35); }
+  50% { transform: scale(1.02); box-shadow: 0 10px 22px rgba(212, 160, 23, 0.5); }
+}
+
+.zjh-actions button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.zjh-actions button.is-ready:not(:disabled) {
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 0 1px rgba(226, 179, 74, 0.25);
+}
+
+#foldButton {
+  border-color: rgba(201, 74, 74, 0.55);
+}
+
+#confirmSelectButton {
+  grid-column: 1 / -1;
+  background: linear-gradient(180deg, #2f8f62, #1a5c40);
+}
+
+.zjh-compare-targets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.zjh-compare-targets button {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 16px;
+  border: 1px solid var(--gold);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--ink);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.zjh-log-panel {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--muted);
+  font-size: 12px;
+  max-height: 96px;
+  overflow: auto;
+}
+
+.zjh-log-panel summary {
+  cursor: pointer;
+  padding: 8px 10px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.zjh-log {
+  margin: 0;
+  padding: 0 10px 8px 28px;
+}
+
+.zjh-log li {
+  margin-bottom: 4px;
+}
+
+.zjh-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(8, 4, 14, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.zjh-setup-panel,
+.zjh-victory-panel,
+.zjh-rules-panel {
+  width: min(400px, 100%);
+  padding: 28px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 179, 74, 0.45);
+  background:
+    linear-gradient(160deg, rgba(40, 28, 20, 0.98), rgba(16, 12, 22, 0.98));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.zjh-setup-badge {
+  color: var(--gold);
+  letter-spacing: 0.35em;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.zjh-setup-panel h1,
+.zjh-victory-panel h2,
+.zjh-rules-panel h2 {
+  margin: 0;
+  font-family: "ZCOOL QingKe HuangYou", sans-serif;
+  font-size: 42px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  background: linear-gradient(180deg, #fff6d4, var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.zjh-setup-lead,
+.zjh-eyebrow {
+  margin: 8px 0 20px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.zjh-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  text-align: left;
+  font-weight: 700;
+}
+
+.zjh-field select {
+  min-width: 180px;
+  min-height: 38px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 179, 74, 0.4);
+  background: #120e18;
+  color: var(--ink);
+  padding: 0 10px;
+}
+
+.zjh-start-btn,
+.zjh-victory-actions button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  color: #1a1208;
+  background: linear-gradient(180deg, #ffe08a, #d4a017);
+  box-shadow: 0 8px 20px rgba(212, 160, 23, 0.35);
+}
+
+.zjh-setup-home {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.zjh-victory-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.zjh-victory-actions button:last-child {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid rgba(226, 179, 74, 0.45);
+  box-shadow: none;
+}
+
+.zjh-rules-panel {
+  text-align: left;
+}
+
+.zjh-rules-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.zjh-rules-head h2 {
+  font-size: 28px;
+}
+
+.zjh-rules-head button {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.zjh-rules-panel ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* 座位布局：最多 6 人，相对椭圆桌面百分比定位 */
+.zjh-seat[data-slot="0"] { left: 50%; top: 88%; }   /* 自己 - 底 */
+.zjh-seat[data-slot="1"] { left: 14%; top: 68%; }   /* 左下 */
+.zjh-seat[data-slot="2"] { left: 14%; top: 32%; }   /* 左上 */
+.zjh-seat[data-slot="3"] { left: 50%; top: 14%; }   /* 顶 */
+.zjh-seat[data-slot="4"] { left: 86%; top: 32%; }   /* 右上 */
+.zjh-seat[data-slot="5"] { left: 86%; top: 68%; }   /* 右下 */
+
+@keyframes chip-pop {
+  from { transform: scale(0.4); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.zjh-fx-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  overflow: hidden;
+}
+
+.zjh-fly-chip {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  margin-left: -18px;
+  margin-top: -18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 900;
+  color: #1a1208;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+  transition: transform 0.7s cubic-bezier(0.22, 0.9, 0.3, 1), opacity 0.7s ease;
+  z-index: 31;
+}
+
+.zjh-fly-chip.gold { background: radial-gradient(circle at 35% 30%, #ffe08a, #d4a017); }
+.zjh-fly-chip.silver { background: radial-gradient(circle at 35% 30%, #f0f0f0, #9aa0a6); }
+.zjh-fly-chip.bronze { background: radial-gradient(circle at 35% 30%, #f0c090, #b87333); }
+
+.zjh-seat-bubble {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(10, 8, 16, 0.88);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  font-size: 12px;
+  font-weight: 900;
+  z-index: 5;
+  animation: bubble-pop 0.35s ease both;
+}
+
+.zjh-seat.is-betting .zjh-avatar,
+.zjh-seat.is-acting .zjh-avatar,
+.zjh-seat.is-compare .zjh-avatar {
+  box-shadow: 0 0 0 2px var(--gold-bright), 0 0 18px rgba(226, 179, 74, 0.65);
+  transform: scale(1.06);
+}
+
+.zjh-pot-amount.is-pulse {
+  animation: pot-pulse 0.55s ease;
+}
+
+.zjh-compare-overlay {
+  z-index: 25;
+  background: rgba(6, 3, 12, 0.78);
+}
+
+.zjh-compare-panel {
+  width: min(440px, 100%);
+  padding: 22px 18px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 179, 74, 0.5);
+  background: linear-gradient(165deg, rgba(42, 30, 22, 0.98), rgba(14, 10, 20, 0.98));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  text-align: center;
+  animation: compare-in 0.35s ease both;
+}
+
+.zjh-compare-duel {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: center;
+  margin: 8px 0 14px;
+}
+
+.zjh-compare-vs {
+  font-family: "ZCOOL QingKe HuangYou", sans-serif;
+  font-size: 22px;
+  color: var(--gold);
+}
+
+.zjh-compare-side {
+  min-width: 0;
+}
+
+.zjh-compare-name {
+  font-size: 14px;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.zjh-compare-name.is-winner {
+  color: var(--gold-bright);
+}
+
+.zjh-compare-name.is-loser {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.zjh-compare-cards {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 6px;
+}
+
+.zjh-compare-card {
+  width: 42px;
+  height: 60px;
+  border-radius: 6px;
+  background: #f8f4ea;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.zjh-compare-card strong {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.zjh-compare-card em {
+  font-style: normal;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.zjh-compare-card.red {
+  color: #c0392b;
+}
+
+.zjh-compare-type {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.zjh-compare-result {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--gold-bright);
+  line-height: 1.45;
+}
+
+@keyframes bubble-pop {
+  from { opacity: 0; transform: translate(-50%, -70%) scale(0.8); }
+  to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+}
+
+@keyframes pot-pulse {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.14); color: #fff3c0; }
+}
+
+@keyframes compare-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 420px) {
+  .zjh-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .zjh-seat {
+    width: 96px;
+  }
+
+  .zjh-avatar {
+    width: 46px;
+    height: 46px;
+  }
+}

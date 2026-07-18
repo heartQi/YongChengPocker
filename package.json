@@ -1,16 +1,17 @@
 {
   "name": "mervin-qi-yongcheng-eight",
   "version": "1.0.0",
-  "description": "A playable browser implementation of 永城扑克, a four-player Henan card game.",
+  "description": "Browser card games: 永城扑克 and 炸金花.",
   "type": "module",
   "scripts": {
-    "test": "node tests/game.test.js",
+    "test": "node tests/game.test.js && node tests/zhajinhua.test.js",
     "build:sites": "node scripts/build-sites.mjs",
     "serve": "python3 -m http.server 4173"
   },
   "keywords": [
     "card-game",
-    "mervinqi-yongchengpoker",
+    "yongcheng-poker",
+    "zhajinhua",
     "ai-native-development"
   ],
   "author": "Mervin Qi",

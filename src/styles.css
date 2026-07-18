@@ -70,6 +70,21 @@ button {
   gap: 12px;
 }
 
+.home-link {
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+.home-link:hover,
+.home-link:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 .rules-button {
   min-height: 30px;
   padding: 5px 11px;
