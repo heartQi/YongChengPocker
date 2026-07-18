@@ -141,7 +141,22 @@ select {
 }
 
 .zjh-seat.is-human {
-  z-index: 2;
+  /* 自己座位上移，避免压住底部手牌 */
+  z-index: 1;
+  width: 88px;
+  gap: 2px;
+  transform: translate(-50%, -100%);
+}
+
+.zjh-seat.is-human .zjh-avatar {
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+}
+
+.zjh-seat.is-human .zjh-chips-bal,
+.zjh-seat.is-human .zjh-seat-status {
+  display: none;
 }
 
 .zjh-name {
@@ -177,13 +192,52 @@ select {
 
 .zjh-mini-hand {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   gap: 3px;
   position: relative;
   min-height: 44px;
-  max-width: 120px;
   align-items: center;
+}
+
+.zjh-seat-status {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zjh-status-tag {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 900;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.zjh-status-tag.is-look {
+  color: var(--gold-bright);
+  border: 1px solid rgba(226, 179, 74, 0.55);
+}
+
+.zjh-status-tag.is-fold {
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.zjh-status-tag.is-out {
+  color: #ffb4b4;
+  border: 1px solid rgba(201, 74, 74, 0.65);
+  background: rgba(80, 20, 20, 0.55);
+}
+
+.zjh-status-tag.is-blind {
+  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.zjh-seat.is-human .zjh-mini-hand {
+  display: none;
 }
 
 .zjh-card-back,
@@ -217,6 +271,14 @@ select {
   color: #c0392b;
 }
 
+.zjh-card-face.joker,
+.zjh-my-card.face.joker,
+.zjh-compare-card.joker {
+  background: linear-gradient(160deg, #fff4c8, #f0d27a);
+  color: #7a4a00;
+  border-color: rgba(180, 120, 20, 0.55);
+}
+
 .zjh-hand-banner {
   position: absolute;
   left: 50%;
@@ -241,6 +303,11 @@ select {
 .zjh-hand-banner.is-fold {
   color: #fff;
   background: rgba(40, 40, 40, 0.7);
+}
+
+.zjh-hand-banner.is-out {
+  color: #ffd0d0;
+  background: rgba(120, 30, 30, 0.82);
 }
 
 .zjh-pot-area {
@@ -292,10 +359,25 @@ select {
 }
 
 .zjh-hand-panel {
+  position: relative;
+  z-index: 6;
   border: 1px solid rgba(226, 179, 74, 0.35);
   border-radius: 12px;
   padding: 10px;
   background: linear-gradient(180deg, rgba(30, 20, 40, 0.92), rgba(16, 10, 24, 0.96));
+}
+
+.zjh-my-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  min-height: 24px;
+}
+
+.zjh-my-meta .zjh-chips-bal {
+  font-size: 13px;
 }
 
 .zjh-my-cards {
@@ -304,6 +386,8 @@ select {
   gap: 8px;
   min-height: 88px;
   margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
 }
 
 .zjh-my-card {
@@ -718,7 +802,7 @@ select {
 }
 
 /* 座位布局：最多 6 人，相对椭圆桌面百分比定位 */
-.zjh-seat[data-slot="0"] { left: 50%; top: 88%; }   /* 自己 - 底 */
+.zjh-seat[data-slot="0"] { left: 50%; top: 78%; }   /* 自己 - 底，偏上以免挡手牌 */
 .zjh-seat[data-slot="1"] { left: 14%; top: 68%; }   /* 左下 */
 .zjh-seat[data-slot="2"] { left: 14%; top: 32%; }   /* 左上 */
 .zjh-seat[data-slot="3"] { left: 50%; top: 14%; }   /* 顶 */
@@ -870,6 +954,14 @@ select {
 
 .zjh-compare-card.red {
   color: #c0392b;
+}
+
+.zjh-compare-card.back {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.4) 0 26%, transparent 28%),
+    linear-gradient(145deg, #5a8fd4, #2f5699);
+  color: transparent;
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .zjh-compare-type {

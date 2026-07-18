@@ -11,8 +11,10 @@ import {
   compareHands,
   compareTargets,
   createGame,
+  describeHand,
   evaluateHand,
   fold,
+  isSpecial235,
   lookCards,
   normalizePayAmount,
   placeBet,
@@ -57,6 +59,47 @@ function card(rank, suit, rankValue) {
       [card("K", "spades", 13), card("Q", "spades", 12), card("J", "spades", 11)]
     ) > 0
   );
+}
+
+// —— 杂色 235 专杀豹子 ——
+{
+  const killer = [card("2", "spades", 2), card("3", "hearts", 3), card("5", "clubs", 5)];
+  const tripleA = [card("A", "spades", 14), card("A", "hearts", 14), card("A", "clubs", 14)];
+  const flush235 = [card("2", "hearts", 2), card("3", "hearts", 3), card("5", "hearts", 5)];
+  assert.equal(isSpecial235(killer), true);
+  assert.equal(isSpecial235(flush235), false);
+  assert.ok(compareHands(killer, tripleA) > 0);
+  assert.ok(compareHands(tripleA, killer) < 0);
+  assert.equal(describeHand(killer), "235杀");
+  // 同花 235 是金花，打不过豹子
+  assert.ok(compareHands(flush235, tripleA) < 0);
+  // 235 打不过同花顺
+  const sf = [card("9", "spades", 9), card("8", "spades", 8), card("7", "spades", 7)];
+  assert.ok(compareHands(killer, sf) < 0);
+}
+
+// —— 癞子大小王 ——
+{
+  const joker = { id: "big-joker", rank: "大王", rankValue: 16, suit: "joker", suitSymbol: "🃏", color: "red", isJoker: true };
+  const withPair = evaluateHand([card("K", "spades", 13), card("K", "hearts", 13), joker]);
+  assert.equal(withPair.type, "triple");
+
+  const withStraight = evaluateHand([card("5", "clubs", 5), card("6", "diamonds", 6), joker]);
+  assert.ok(["straight", "straightFlush", "flush", "pair"].includes(withStraight.type));
+  assert.ok(withStraight.rank >= 2);
+
+  const twoJokers = evaluateHand([
+    card("9", "spades", 9),
+    { id: "small-joker", rank: "小王", rankValue: 15, suit: "joker", suitSymbol: "🃏", color: "black", isJoker: true },
+    joker
+  ]);
+  assert.equal(twoJokers.type, "triple");
+  assert.deepEqual(twoJokers.values, [9, 9, 9]);
+
+  const state = createGame({ playerCount: 2, cardsPerPlayer: 3, useJokers: true, random: () => 0.11 });
+  assert.equal(state.useJokers, true);
+  const totalCards = state.players.reduce((n, p) => n + p.hand.length, 0) + state.stock.length;
+  assert.equal(totalCards, 54);
 }
 
 // —— 开局底注与闷跟 ——
@@ -138,6 +181,7 @@ function card(rank, suit, rankValue) {
   assert.equal(state.status, "finished");
   assert.equal(state.winnerId, 0);
   assert.equal(state.players[1].folded, true);
+  assert.equal(state.players[1].eliminated, true);
 }
 
 // —— 三人局比牌后赢家继续与第三人玩 ——
@@ -161,6 +205,7 @@ function card(rank, suit, rankValue) {
   assert.ok(requestCompare(state, 0, 1));
   assert.equal(state.status, "betting");
   assert.equal(state.players[1].folded, true);
+  assert.equal(state.players[1].eliminated, true);
   assert.equal(state.players[0].folded, false);
   assert.equal(state.players[2].folded, false);
   assert.equal(state.lastAction.continues, true);

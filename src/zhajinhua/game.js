@@ -9,6 +9,11 @@ export const SUITS = [
 
 export const RANKS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
 
+export const JOKERS = [
+  { id: "small-joker", rank: "小王", rankValue: 15, suit: "joker", suitSymbol: "🃏", color: "black", isJoker: true },
+  { id: "big-joker", rank: "大王", rankValue: 16, suit: "joker", suitSymbol: "🃏", color: "red", isJoker: true }
+];
+
 export const START_CHIPS = 100_000;
 export const ANTE = 1_000;
 export const MIN_BET = 1_000;
@@ -24,17 +29,20 @@ const HAND_TYPES = {
 
 const PLAYER_NAME_POOL = ["你", "阿强", "小美", "老周", "阿杰", "小雨"];
 
-export function createDeck() {
-  return SUITS.flatMap((suit) =>
+export function createDeck(useJokers = false) {
+  const standard = SUITS.flatMap((suit) =>
     RANKS.map((rank, index) => ({
       id: `${rank}-${suit.id}`,
       rank,
       rankValue: index + 2,
       suit: suit.id,
       suitSymbol: suit.symbol,
-      color: suit.color
+      color: suit.color,
+      isJoker: false
     }))
   );
+  if (!useJokers) return standard;
+  return [...standard, ...JOKERS.map((card) => ({ ...card }))];
 }
 
 export function shuffle(deck, random = Math.random) {
@@ -48,6 +56,7 @@ export function shuffle(deck, random = Math.random) {
 
 export function cardLabel(card) {
   if (!card) return "";
+  if (card.isJoker) return card.rank;
   return `${card.suitSymbol}${card.rank}`;
 }
 
@@ -61,15 +70,16 @@ function clonePlayerChips(prevPlayers, playerCount) {
 }
 
 /**
- * @param {{ playerCount?: number, cardsPerPlayer?: 3|5, random?: () => number, prevPlayers?: object[] }} options
+ * @param {{ playerCount?: number, cardsPerPlayer?: 3|5, useJokers?: boolean, random?: () => number, prevPlayers?: object[] }} options
  */
 export function createGame(options = {}) {
   const playerCount = clamp(options.playerCount ?? 4, 2, 6);
   const cardsPerPlayer = options.cardsPerPlayer === 5 ? 5 : 3;
+  const useJokers = Boolean(options.useJokers);
   const random = options.random ?? Math.random;
   const chipSeed = clonePlayerChips(options.prevPlayers, playerCount);
 
-  const deck = shuffle(createDeck(), random);
+  const deck = shuffle(createDeck(useJokers), random);
   const dealerId = options.dealerId != null ? options.dealerId % playerCount : Math.floor(random() * playerCount);
 
   let pot = 0;
@@ -84,6 +94,8 @@ export function createGame(options = {}) {
       hand: [],
       isBlind: true,
       folded: false,
+      /** 比牌失败淘汰（与主动弃牌区分，UI 显示「淘汰」） */
+      eliminated: false,
       out: chips < ANTE,
       betThisRound: 0,
       totalBet: antePaid,
@@ -117,6 +129,7 @@ export function createGame(options = {}) {
     actedThisRound: [],
     cardsPerPlayer,
     playerCount,
+    useJokers,
     status: activeIds.length < 2 ? "finished" : "betting",
     winnerId: null,
     comparePending: null,
@@ -125,8 +138,10 @@ export function createGame(options = {}) {
     log: [
       createLogEntry(
         "开局",
-        `${playerCount} 人局，每人 ${cardsPerPlayer} 张牌`,
-        `底注 ${ANTE}，起始筹码 ${START_CHIPS}。每人先下底注。`
+        `${playerCount} 人局，每人 ${cardsPerPlayer} 张牌${useJokers ? "，含大小王癞子" : ""}`,
+        useJokers
+          ? `底注 ${ANTE}。大小王可当任意牌组成最大牌型。`
+          : `底注 ${ANTE}，起始筹码 ${START_CHIPS}。每人先下底注。`
       )
     ]
   };
@@ -305,6 +320,7 @@ export function fold(state, playerId) {
   if (!canFold(state, playerId)) return false;
   const player = state.players[playerId];
   player.folded = true;
+  player.eliminated = false;
   state.lastAction = { type: "fold", playerId };
   state.log.push(createLogEntry("弃牌", `${player.name} 弃牌`));
   state.comparePending = null;
@@ -423,9 +439,15 @@ function resolveCompare(state, actorId, targetId, actorPickIds, targetPickIds) {
   const cmp = compareHands(actorHand, targetHand);
   const winnerId = cmp >= 0 ? actorId : targetId;
   const loserId = cmp >= 0 ? targetId : actorId;
-  state.players[loserId].folded = true;
+  const loser = state.players[loserId];
+  loser.folded = true;
+  loser.eliminated = true;
 
-  // 比牌双方视为已看牌；输家出局，赢家留下继续与其他人玩
+  // 记录比牌前是否闷牌（闷比不亮牌面给闷牌方看）
+  const actorWasBlind = actor.isBlind;
+  const targetWasBlind = target.isBlind;
+
+  // 比牌后双方记为已看牌；输家淘汰，赢家留下继续与其他人玩
   actor.isBlind = false;
   target.isBlind = false;
 
@@ -439,14 +461,16 @@ function resolveCompare(state, actorId, targetId, actorPickIds, targetPickIds) {
     amount: cost,
     actorCards: actorHand.map((c) => ({ ...c })),
     targetCards: targetHand.map((c) => ({ ...c })),
-    actorType: handLabel(evaluateHand(actorHand)),
-    targetType: handLabel(evaluateHand(targetHand)),
+    actorType: describeHand(actorHand),
+    targetType: describeHand(targetHand),
+    actorWasBlind,
+    targetWasBlind,
     continues: remaining > 1
   };
   state.log.push(
     createLogEntry(
       "比牌",
-      `${actor.name} 与 ${target.name} 比牌，${state.players[winnerId].name} 胜`,
+      `${actor.name} 与 ${target.name} 比牌，${state.players[winnerId].name} 胜，${loser.name} 淘汰`,
       remaining > 1
         ? `${state.lastAction.actorType} vs ${state.lastAction.targetType}。${state.players[winnerId].name} 留下，仍有 ${remaining} 人在局`
         : `${state.lastAction.actorType} vs ${state.lastAction.targetType}，支付 ${cost}`
@@ -458,6 +482,53 @@ function resolveCompare(state, actorId, targetId, actorPickIds, targetPickIds) {
 }
 
 export function evaluateHand(cards) {
+  const hand = [...cards];
+  const jokers = hand.filter((c) => c.isJoker);
+  const natural = hand.filter((c) => !c.isJoker);
+
+  if (jokers.length === 0) return evaluateNatural(hand);
+
+  // 两张癞子 + 一张牌 → 必成该点数豹子；两张癞子无自然牌不应出现在三张手牌
+  if (jokers.length >= 2) {
+    const rankValue = natural[0]?.rankValue ?? 14;
+    const rank = natural[0]?.rank ?? "A";
+    const suit = natural[0]?.suit ?? "spades";
+    const suitSymbol = natural[0]?.suitSymbol ?? "♠";
+    const filled = [
+      natural[0] ?? { id: "wild-a", rank, rankValue, suit, suitSymbol, color: "black" },
+      { id: "wild-b", rank, rankValue, suit, suitSymbol, color: "black", fromJoker: true },
+      { id: "wild-c", rank, rankValue, suit, suitSymbol, color: "black", fromJoker: true }
+    ];
+    return {
+      type: "triple",
+      rank: HAND_TYPES.triple.rank,
+      values: [rankValue, rankValue, rankValue],
+      cards: filled,
+      wildCount: jokers.length
+    };
+  }
+
+  // 一张癞子：枚举成任意牌，取最大牌型
+  let best = null;
+  for (const suit of SUITS) {
+    for (let index = 0; index < RANKS.length; index += 1) {
+      const wild = {
+        id: "wild-temp",
+        rank: RANKS[index],
+        rankValue: index + 2,
+        suit: suit.id,
+        suitSymbol: suit.symbol,
+        color: suit.color,
+        fromJoker: true
+      };
+      const result = evaluateNatural([...natural, wild]);
+      if (!best || compareEval(result, best) > 0) best = { ...result, wildCount: 1 };
+    }
+  }
+  return best ?? evaluateNatural(natural);
+}
+
+function evaluateNatural(cards) {
   const three = [...cards].sort((a, b) => b.rankValue - a.rankValue || a.suit.localeCompare(b.suit));
   const values = three.map((c) => c.rankValue);
   const flush = three[0].suit === three[1].suit && three[1].suit === three[2].suit;
@@ -483,9 +554,7 @@ export function evaluateHand(cards) {
   return { type: "high", rank: HAND_TYPES.high.rank, values, cards: three };
 }
 
-export function compareHands(aCards, bCards) {
-  const a = evaluateHand(aCards);
-  const b = evaluateHand(bCards);
+function compareEval(a, b) {
   if (a.rank !== b.rank) return a.rank - b.rank;
   for (let i = 0; i < Math.max(a.values.length, b.values.length); i += 1) {
     const dv = (a.values[i] ?? 0) - (b.values[i] ?? 0);
@@ -494,8 +563,39 @@ export function compareHands(aCards, bCards) {
   return 0;
 }
 
+/**
+ * 杂色 2-3-5（非同花）专杀豹子。
+ * 同花 235 按金花计，不触发专杀。
+ */
+export function isSpecial235(cards) {
+  if (!cards || cards.length !== 3) return false;
+  if (cards.some((c) => c.isJoker)) return false;
+  const values = cards.map((c) => c.rankValue).sort((a, b) => a - b);
+  if (values[0] !== 2 || values[1] !== 3 || values[2] !== 5) return false;
+  const flush = cards[0].suit === cards[1].suit && cards[1].suit === cards[2].suit;
+  return !flush;
+}
+
+export function compareHands(aCards, bCards) {
+  const a = evaluateHand(aCards);
+  const b = evaluateHand(bCards);
+  const a235 = isSpecial235(aCards);
+  const b235 = isSpecial235(bCards);
+  // 2-3-5 专杀豹子（含癞子凑成的豹子）
+  if (a235 && b.type === "triple") return 1;
+  if (b235 && a.type === "triple") return -1;
+  return compareEval(a, b);
+}
+
 export function handLabel(evalResult) {
-  return HAND_TYPES[evalResult.type]?.label ?? "牌型";
+  const base = HAND_TYPES[evalResult.type]?.label ?? "牌型";
+  if (evalResult.wildCount) return `${base}(癞子)`;
+  return base;
+}
+
+export function describeHand(cards) {
+  if (isSpecial235(cards)) return "235杀";
+  return handLabel(evaluateHand(cards));
 }
 
 export function bestThree(cards) {
@@ -596,6 +696,8 @@ export function handStrength(player) {
     // 闷牌：用随机偏置 + 粗估
     return 0.35 + Math.random() * 0.25;
   }
+  // 235 专杀对豹子很强，对其它牌型仍偏弱
+  if (isSpecial235(cards)) return 0.68;
   const ev = evaluateHand(cards);
   const base = (ev.rank - 1) / 5;
   const tip = (ev.values[0] ?? 0) / 14 / 6;

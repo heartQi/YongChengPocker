@@ -11,9 +11,8 @@ import {
   cardLabel,
   compareTargets,
   createGame,
-  evaluateHand,
+  describeHand,
   fold,
-  handLabel,
   lookCards,
   minPayAmount,
   normalizePayAmount,
@@ -50,6 +49,7 @@ const compareEyebrow = document.querySelector("#compareEyebrow");
 const fxLayer = document.querySelector("#fxLayer");
 const playerCountSelect = document.querySelector("#playerCountSelect");
 const cardsSelect = document.querySelector("#cardsSelect");
+const jokerSelect = document.querySelector("#jokerSelect");
 const startButton = document.querySelector("#startButton");
 const seatsEl = document.querySelector("#seats");
 const chipsEl = document.querySelector("#chips");
@@ -58,6 +58,7 @@ const potBadgeEl = document.querySelector("#potBadge");
 const roundBadgeEl = document.querySelector("#roundBadge");
 const stakeBadgeEl = document.querySelector("#stakeBadge");
 const turnHintEl = document.querySelector("#turnHint");
+const myMetaEl = document.querySelector("#myMeta");
 const myCardsEl = document.querySelector("#myCards");
 const hintEl = document.querySelector("#hint");
 const logEl = document.querySelector("#log");
@@ -223,6 +224,7 @@ function startGame({ keepChips = false } = {}) {
   state = createGame({
     playerCount,
     cardsPerPlayer,
+    useJokers: jokerSelect.value === "on",
     prevPlayers: keepChips && state ? state.players : null,
     dealerId: keepChips && state ? (state.dealerId + 1) % playerCount : undefined
   });
@@ -452,19 +454,53 @@ async function showCompareOverlay(action) {
   const actor = state.players[action.playerId];
   const target = state.players[action.targetId];
   const winner = state.players[action.winnerId];
+  const me = state.players[0];
+  const humanInCompare = action.playerId === 0 || action.targetId === 0;
+  const humanWasBlind =
+    (action.playerId === 0 && action.actorWasBlind) ||
+    (action.targetId === 0 && action.targetWasBlind);
+  // 仍在局且未参与 → 不看牌；自己闷着比牌 → 也不看牌；看牌后比牌 / 已弃牌旁观 → 可看
+  const canSeeCards =
+    me.folded ||
+    state.status === "finished" ||
+    (humanInCompare && !humanWasBlind);
 
-  compareEyebrow.textContent = "比牌中";
-  compareSideA.innerHTML = compareSideHtml(actor, action.actorCards, action.actorType, action.winnerId === actor.id);
-  compareSideB.innerHTML = compareSideHtml(target, action.targetCards, action.targetType, action.winnerId === target.id);
+  compareEyebrow.textContent = humanWasBlind
+    ? "闷牌比牌"
+    : canSeeCards
+      ? "比牌中"
+      : "他人比牌";
+  compareSideA.innerHTML = compareSideHtml(
+    actor,
+    action.actorCards,
+    action.actorType,
+    action.winnerId === actor.id,
+    canSeeCards
+  );
+  compareSideB.innerHTML = compareSideHtml(
+    target,
+    action.targetCards,
+    action.targetType,
+    action.winnerId === target.id,
+    canSeeCards
+  );
 
-  if (action.continues) {
-    compareResultText.textContent = `${winner.name} 赢了这一轮比牌，继续与其他玩家对局`;
+  const loser = state.players[action.loserId];
+  if (humanWasBlind) {
+    compareResultText.textContent = action.continues
+      ? `${winner.name} 胜，${loser.name} 淘汰（闷比不亮牌）`
+      : `${winner.name} 赢得本局！${loser.name} 淘汰（闷比不亮牌）`;
+  } else if (!canSeeCards) {
+    compareResultText.textContent = action.continues
+      ? `${winner.name} 胜，${loser.name} 淘汰（牌面保密）；你仍在局中`
+      : `${winner.name} 赢得本局！${loser.name} 淘汰`;
+  } else if (action.continues) {
+    compareResultText.textContent = `${winner.name} 胜，${loser.name} 淘汰；继续与其他玩家对局`;
   } else {
-    compareResultText.textContent = `${winner.name} 赢得本局！`;
+    compareResultText.textContent = `${winner.name} 赢得本局！${loser.name} 淘汰`;
   }
 
   compareScreen.classList.remove("hidden");
-  // 座位上也高亮双方
   flashSeat(action.playerId, "is-compare");
   flashSeat(action.targetId, "is-compare");
   await wait(DELAY.compare);
@@ -474,18 +510,29 @@ function hideCompareOverlay() {
   compareScreen?.classList.add("hidden");
 }
 
-function compareSideHtml(player, cards, typeLabel, isWinner) {
-  const cardsHtml = (cards ?? [])
-    .map(
-      (card) =>
-        `<span class="zjh-compare-card ${card.color}"><strong>${card.rank}</strong><em>${card.suitSymbol}</em></span>`
-    )
-    .join("");
+function compareSideHtml(player, cards, typeLabel, isWinner, revealCards = true) {
+  const cardsHtml = revealCards
+    ? (cards ?? [])
+        .map((card) =>
+          card.isJoker
+            ? `<span class="zjh-compare-card joker ${card.color}"><strong>${card.rank}</strong><em>癞</em></span>`
+            : `<span class="zjh-compare-card ${card.color}"><strong>${card.rank}</strong><em>${card.suitSymbol}</em></span>`
+        )
+        .join("")
+    : `<span class="zjh-compare-card back"></span><span class="zjh-compare-card back"></span><span class="zjh-compare-card back"></span>`;
+
   return `
-    <div class="zjh-compare-name ${isWinner ? "is-winner" : "is-loser"}">${player.name}${isWinner ? " · 胜" : ""}</div>
+    <div class="zjh-compare-name ${isWinner ? "is-winner" : "is-loser"}">${player.name}${isWinner ? " · 胜" : " · 淘汰"}</div>
     <div class="zjh-compare-cards">${cardsHtml}</div>
-    <div class="zjh-compare-type">${typeLabel ?? ""}</div>
+    <div class="zjh-compare-type">${revealCards ? typeLabel ?? "" : "牌面保密"}</div>
   `;
+}
+
+function cardFaceHtml(card, sizeClass = "zjh-card-face") {
+  if (card.isJoker) {
+    return `<span class="${sizeClass} joker ${card.color}"><span>${card.rank}</span><span>癞</span></span>`;
+  }
+  return `<span class="${sizeClass} ${card.color}"><span>${card.rank}</span><span>${card.suitSymbol}</span></span>`;
 }
 
 function render() {
@@ -497,6 +544,7 @@ function render() {
   turnHintEl.textContent = turnText();
   renderSeats();
   renderChips();
+  renderMyMeta();
   renderMyCards();
   renderActions();
   renderLog();
@@ -534,29 +582,43 @@ function renderSeats() {
       seat.classList.add("is-turn");
     }
 
-    const showFace =
-      player.id === 0
-        ? !player.isBlind || player.folded || state.status === "finished"
-        : spectatorReveal;
-
-    const cardsHtml = player.hand
-      .map((card) => {
-        if (showFace) {
-          return `<span class="zjh-card-face ${card.color}"><span>${card.rank}</span><span>${card.suitSymbol}</span></span>`;
-        }
-        return `<span class="zjh-card-back"></span>`;
-      })
-      .join("");
-
-    let banner = "";
-    if (player.folded) banner = `<span class="zjh-hand-banner is-fold">弃牌</span>`;
-    else if (!player.isBlind && !spectatorReveal) banner = `<span class="zjh-hand-banner is-look">看牌</span>`;
+    // 自己的牌只在底部大手牌区展示，座位上不重复画牌面，避免和手牌重叠
+    let handBlock = "";
+    if (player.id === 0) {
+      let status = "";
+      if (player.folded) {
+        status = player.eliminated
+          ? `<span class="zjh-status-tag is-out">淘汰</span>`
+          : `<span class="zjh-status-tag is-fold">弃牌</span>`;
+      } else if (!player.isBlind) status = `<span class="zjh-status-tag is-look">已看牌</span>`;
+      else status = `<span class="zjh-status-tag is-blind">闷牌中</span>`;
+      handBlock = `<div class="zjh-seat-status">${status}</div>`;
+    } else {
+      const showFace = spectatorReveal;
+      // 座位小牌最多显示 3 张牌背/牌面，五张模式也不换行堆叠
+      const cardsHtml = player.hand
+        .slice(0, 3)
+        .map((card) => {
+          if (showFace) return cardFaceHtml(card);
+          return `<span class="zjh-card-back"></span>`;
+        })
+        .join("");
+      let banner = "";
+      if (player.folded) {
+        banner = player.eliminated
+          ? `<span class="zjh-hand-banner is-out">淘汰</span>`
+          : `<span class="zjh-hand-banner is-fold">弃牌</span>`;
+      } else if (!player.isBlind && !spectatorReveal) {
+        banner = `<span class="zjh-hand-banner is-look">看牌</span>`;
+      }
+      handBlock = `<div class="zjh-mini-hand">${cardsHtml}${banner}</div>`;
+    }
 
     seat.innerHTML = `
       <span class="zjh-name">${player.name}</span>
       <div class="zjh-avatar" aria-hidden="true">${AVATAR_GLYPHS[player.id] ?? "牌"}</div>
       <span class="zjh-chips-bal">${formatChips(player.chips)}</span>
-      <div class="zjh-mini-hand">${cardsHtml}${banner}</div>
+      ${handBlock}
     `;
     seatsEl.append(seat);
   });
@@ -600,6 +662,30 @@ function splitPotChips(pot) {
   return chips;
 }
 
+function renderMyMeta() {
+  if (!myMetaEl) return;
+  myMetaEl.innerHTML = "";
+  if (!state || !started) return;
+  const me = state.players[0];
+  const chips = document.createElement("span");
+  chips.className = "zjh-chips-bal";
+  chips.textContent = formatChips(me.chips);
+  myMetaEl.append(chips);
+
+  const tag = document.createElement("span");
+  if (me.folded) {
+    tag.className = `zjh-status-tag ${me.eliminated ? "is-out" : "is-fold"}`;
+    tag.textContent = me.eliminated ? "淘汰" : "弃牌";
+  } else if (!me.isBlind) {
+    tag.className = "zjh-status-tag is-look";
+    tag.textContent = "已看牌";
+  } else {
+    tag.className = "zjh-status-tag is-blind";
+    tag.textContent = "闷牌中";
+  }
+  myMetaEl.append(tag);
+}
+
 function renderMyCards() {
   myCardsEl.innerHTML = "";
   if (!state) return;
@@ -615,8 +701,10 @@ function renderMyCards() {
     btn.type = "button";
     const canSee = !me.isBlind || me.folded || state.status === "finished" || selecting;
     if (canSee) {
-      btn.className = `zjh-my-card face ${card.color}`;
-      btn.innerHTML = `<span class="rank">${card.rank}</span><span class="suit">${card.suitSymbol}</span>`;
+      btn.className = `zjh-my-card face ${card.color}${card.isJoker ? " joker" : ""}`;
+      btn.innerHTML = card.isJoker
+        ? `<span class="rank">${card.rank}</span><span class="suit">癞</span>`
+        : `<span class="rank">${card.rank}</span><span class="suit">${card.suitSymbol}</span>`;
       btn.setAttribute("aria-label", cardLabel(card));
     } else {
       btn.className = "zjh-my-card back";
@@ -758,9 +846,9 @@ function renderVictory() {
   if (!finished) return;
   const winner = state.players[state.winnerId];
   victoryTitle.textContent = winner.id === 0 ? "你赢了！" : `${winner.name} 获胜`;
-  const hand = winner.hand.length >= 3 ? evaluateHand(bestThree(winner.hand)) : null;
-  victoryDetail.textContent = hand
-    ? `${winner.name} 以「${handLabel(hand)}」取胜，当前筹码 ${formatChips(winner.chips)}`
+  const handCards = winner.hand.length >= 3 ? bestThree(winner.hand) : null;
+  victoryDetail.textContent = handCards
+    ? `${winner.name} 以「${describeHand(handCards)}」取胜，当前筹码 ${formatChips(winner.chips)}`
     : `当前筹码 ${formatChips(winner.chips)}`;
 }
 
@@ -768,7 +856,9 @@ function turnText() {
   if (!state) return "准备开始";
   if (fxPlaying) return "动作播放中…";
   if (state.status === "finished") return "本局结束";
-  if (state.players[0]?.folded && state.status !== "finished") return "旁观中（已弃牌）";
+  if (state.players[0]?.folded && state.status !== "finished") {
+    return state.players[0].eliminated ? "旁观中（已淘汰）" : "旁观中（已弃牌）";
+  }
   if (state.status === "selecting") return "比牌选牌中";
   const p = state.players[state.currentPlayerId];
   return p ? `轮到 ${p.name}` : "";
@@ -779,7 +869,9 @@ function hintText() {
   if (fxPlaying) return "请看桌上的下注 / 比牌动画。";
   if (state.status === "finished") return "可以再来一局，筹码会保留。";
   if (state.players[0]?.folded && state.status !== "finished") {
-    return "你已弃牌，可旁观其余玩家的手牌。";
+    return state.players[0].eliminated
+      ? "你比牌失败被淘汰，可旁观其余玩家的手牌。"
+      : "你已弃牌，可旁观其余玩家的手牌。";
   }
   if (state.status === "selecting") {
     return `请点选 3 张牌用于比牌（已选 ${selectedCardIds.length}/3）`;

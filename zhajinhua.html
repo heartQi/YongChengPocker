@@ -36,6 +36,7 @@
       </section>
 
       <section class="zjh-hand-panel" aria-label="你的手牌与操作">
+        <div id="myMeta" class="zjh-my-meta" aria-label="我的状态"></div>
         <div id="myCards" class="zjh-my-cards"></div>
         <p id="hint" class="zjh-hint">设置人数与张数后开始。</p>
         <div id="betSizer" class="zjh-bet-sizer hidden" aria-label="设置出筹大小">
@@ -92,6 +93,14 @@
             </select>
           </label>
 
+          <label class="zjh-field">
+            <span>大小王</span>
+            <select id="jokerSelect">
+              <option value="off" selected>不含大小王</option>
+              <option value="on">加入大小王作癞子</option>
+            </select>
+          </label>
+
           <button id="startButton" class="zjh-start-btn" type="button">开始游戏</button>
           <a class="zjh-setup-home" href="index.html">返回纸牌馆</a>
         </div>
@@ -134,8 +143,11 @@
             <li>开局牌面朝下。出筹前可选择筹码大小；闷牌按 1000 步进，看牌后按两倍步进。</li>
             <li>第一轮不可比牌，但可以看牌后弃牌。</li>
             <li>看牌玩家不能主动与闷牌玩家比牌；闷牌玩家可与任意玩家比牌。</li>
+            <li>你仍在局中时，他人比牌只显示胜负；自己闷着比牌也不亮牌，只有看牌后再比牌才能看到双方牌面。</li>
             <li>可选 3 张或 5 张模式；5 张比牌时双方各从手牌中选 3 张比较。</li>
+            <li>开局可选加入大小王作癞子：大王/小王可当成任意花色点数，凑成最大牌型。</li>
             <li>牌型从大到小：豹子 &gt; 同花顺 &gt; 金花 &gt; 顺子 &gt; 对子 &gt; 散牌。</li>
+            <li>特例：杂色 2、3、5（非同花）专杀豹子；同花 235 按金花计算，不触发专杀。</li>
           </ul>
         </div>
       </section>
