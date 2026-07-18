@@ -2,7 +2,6 @@ import {
   ANTE,
   applyAiMove,
   bestThree,
-  betChoices,
   betUnit,
   canCall,
   canCompare,
@@ -61,7 +60,6 @@ const turnHintEl = document.querySelector("#turnHint");
 const myMetaEl = document.querySelector("#myMeta");
 const myCardsEl = document.querySelector("#myCards");
 const hintEl = document.querySelector("#hint");
-const logEl = document.querySelector("#log");
 const compareTargetsEl = document.querySelector("#compareTargets");
 
 const lookButton = document.querySelector("#lookButton");
@@ -71,7 +69,8 @@ const foldButton = document.querySelector("#foldButton");
 const confirmSelectButton = document.querySelector("#confirmSelectButton");
 const nextRoundButton = document.querySelector("#nextRoundButton");
 const backSetupButton = document.querySelector("#backSetupButton");
-const rulesButton = document.querySelector("#rulesButton");
+const restartButtons = document.querySelectorAll(".js-restart");
+const rulesButtons = document.querySelectorAll(".js-rules");
 const rulesCloseButton = document.querySelector("#rulesCloseButton");
 const victoryTitle = document.querySelector("#victoryTitle");
 const victoryDetail = document.querySelector("#victoryDetail");
@@ -79,14 +78,29 @@ const betSizer = document.querySelector("#betSizer");
 const betSizerLabel = document.querySelector("#betSizerLabel");
 const betAmountInput = document.querySelector("#betAmountInput");
 const betInputHint = document.querySelector("#betInputHint");
-const betChips = document.querySelector("#betChips");
 const betMinusButton = document.querySelector("#betMinusButton");
 const betPlusButton = document.querySelector("#betPlusButton");
 
 const AVATAR_GLYPHS = ["我", "强", "美", "周", "杰", "雨"];
 
+function restartGame() {
+  clearAiTimer();
+  hideCompareOverlay();
+  fxPlaying = false;
+  if (started) {
+    startGame({ keepChips: false });
+  } else {
+    setupScreen.classList.add("hidden");
+    startGame({ keepChips: false });
+  }
+}
+
 startButton.addEventListener("click", () => {
   startGame();
+});
+
+restartButtons.forEach((button) => {
+  button.addEventListener("click", restartGame);
 });
 
 nextRoundButton.addEventListener("click", () => {
@@ -103,7 +117,9 @@ backSetupButton.addEventListener("click", () => {
   setupScreen.classList.remove("hidden");
 });
 
-rulesButton.addEventListener("click", () => rulesScreen.classList.remove("hidden"));
+rulesButtons.forEach((button) => {
+  button.addEventListener("click", () => rulesScreen.classList.remove("hidden"));
+});
 rulesCloseButton.addEventListener("click", () => rulesScreen.classList.add("hidden"));
 rulesScreen.addEventListener("click", (e) => {
   if (e.target === rulesScreen) rulesScreen.classList.add("hidden");
@@ -134,14 +150,6 @@ betMinusButton.addEventListener("click", () => {
 betPlusButton.addEventListener("click", () => {
   if (!canActNow() || !state) return;
   adjustPayAmount(betUnit(state, 0));
-});
-
-betChips.addEventListener("click", (event) => {
-  const btn = event.target.closest("[data-pay]");
-  if (!btn || !canActNow() || !state) return;
-  selectedPayAmount = normalizePayAmount(state, 0, Number(btn.dataset.pay));
-  renderBetSizer();
-  renderActions();
 });
 
 betAmountInput.addEventListener("change", () => {
@@ -247,16 +255,9 @@ function adjustPayAmount(delta) {
 
 function syncSelectedPayAmount() {
   if (!state || state.status !== "betting" || state.currentPlayerId !== 0) return;
-  const choices = betChoices(state, 0);
   const minPay = minPayAmount(state, 0);
-  if (!choices.length) {
-    selectedPayAmount = minPay;
-    return;
-  }
   selectedPayAmount = normalizePayAmount(state, 0, selectedPayAmount || minPay);
-  if (!choices.includes(selectedPayAmount)) {
-    selectedPayAmount = choices.includes(minPay) ? minPay : choices[0];
-  }
+  if (selectedPayAmount < minPay) selectedPayAmount = minPay;
 }
 
 async function afterHumanAction() {
@@ -547,7 +548,6 @@ function render() {
   renderMyMeta();
   renderMyCards();
   renderActions();
-  renderLog();
   renderVictory();
   hintEl.textContent = hintText();
 }
@@ -667,11 +667,7 @@ function renderMyMeta() {
   myMetaEl.innerHTML = "";
   if (!state || !started) return;
   const me = state.players[0];
-  const chips = document.createElement("span");
-  chips.className = "zjh-chips-bal";
-  chips.textContent = formatChips(me.chips);
-  myMetaEl.append(chips);
-
+  // 筹码已在座位上与其他人一致显示，这里只补状态标签
   const tag = document.createElement("span");
   if (me.folded) {
     tag.className = `zjh-status-tag ${me.eliminated ? "is-out" : "is-fold"}`;
@@ -756,20 +752,6 @@ function renderBetSizer() {
     ? `可输入金额，不少于 ${formatChips(minPay)}，按 ${formatChips(unit)} 对齐`
     : `看牌出筹可输入，不少于 ${formatChips(minPay)}，按 ${formatChips(unit)} 对齐`;
 
-  const choices = betChoices(state, 0);
-  betChips.innerHTML = "";
-  choices.forEach((amount) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.dataset.pay = String(amount);
-    btn.className = "zjh-chip-pick";
-    if (amount === pay) btn.classList.add("is-selected");
-    btn.textContent = formatChips(amount);
-    if (amount === minPay) btn.title = me.isBlind ? "闷跟" : "跟注";
-    else btn.title = me.isBlind ? "闷加" : "加注";
-    betChips.append(btn);
-  });
-
   betMinusButton.disabled = pay <= minPay;
   betPlusButton.disabled = pay + unit > me.chips;
 }
@@ -832,16 +814,6 @@ function renderActions() {
   // 出筹码按钮在金额面板内，选牌时随面板隐藏
 }
 
-function renderLog() {
-  logEl.innerHTML = "";
-  if (!state) return;
-  state.log.slice(-40).forEach((entry) => {
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${entry.type}</strong> ${entry.main}${entry.detail ? ` · ${entry.detail}` : ""}`;
-    logEl.append(li);
-  });
-}
-
 function renderVictory() {
   const finished = state?.status === "finished" && !fxPlaying;
   victoryScreen.classList.toggle("hidden", !finished);
@@ -886,11 +858,11 @@ function hintText() {
       : "看牌可与其他已看牌玩家比牌；不能主动比闷牌玩家。";
   }
   const me = state.players[0];
-  if (me.isBlind) return "输入或选择金额后，点下方金色「出筹码」按钮。";
+  if (me.isBlind) return "输入金额或用 −/+ 调整，再点「出筹码」。";
   if (state.roundCount > 1 && !compareTargets(state, 0).length && activePlayersAlive()) {
-    return "看牌后可与已看牌的对手比牌；当前对手都还在闷牌，不能主动比他们。";
+    return "看牌后可与已看牌的对手比牌；当前对手都还在闷牌。";
   }
-  return "看牌可与已看牌玩家比牌。选好金额出筹，或比牌 / 弃牌。";
+  return "看牌可与已看牌玩家比牌。出筹、比牌或弃牌。";
 }
 
 function activePlayersAlive() {

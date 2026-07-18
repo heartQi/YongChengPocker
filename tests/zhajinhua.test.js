@@ -295,7 +295,23 @@ function card(rank, suit, rankValue) {
   assert.ok(seenPay >= seenMin + MIN_BET * 2);
   assert.ok(placeBet(state, 1, seenPay));
   assert.ok(state.seenCallLevel >= seenPay);
-  assert.ok(state.blindCallLevel >= Math.ceil(state.seenCallLevel / 2 / MIN_BET) * MIN_BET - MIN_BET);
+  // 看牌加注后，闷注须严格大于看注一半
+  assert.ok(state.blindCallLevel > state.seenCallLevel / 2);
+  assert.equal(
+    state.blindCallLevel,
+    Math.floor(state.seenCallLevel / 2 / MIN_BET) * MIN_BET + MIN_BET
+  );
+}
+
+// —— 看牌出 6000 时，闷注须大于一半（至少 4000）——
+{
+  const state = createGame({ playerCount: 2, cardsPerPlayer: 3, random: () => 0.73, dealerId: 1 });
+  assert.ok(callBet(state, 0));
+  assert.ok(lookCards(state, 1));
+  assert.ok(placeBet(state, 1, 6000));
+  assert.equal(state.seenCallLevel, 6000);
+  assert.equal(state.blindCallLevel, 4000);
+  assert.equal(callCost(state, 0), 3000); // 已闷跟 1000，还需补到 4000
 }
 
 // —— 闷注/看注分别不能比前一次更低 ——
@@ -321,7 +337,8 @@ function card(rank, suit, rankValue) {
   assert.equal(callCost(state, 2), MIN_BET * 6);
   assert.ok(placeBet(state, 2, MIN_BET * 8)); // 看加 8000
   assert.equal(state.seenCallLevel, MIN_BET * 8);
-  assert.ok(state.blindCallLevel >= MIN_BET * 4);
+  // 8000 的一半是 4000，大于一半 → 闷至少 5000
+  assert.equal(state.blindCallLevel, MIN_BET * 5);
 }
 
 console.log("zhajinhua tests passed");

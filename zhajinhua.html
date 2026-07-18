@@ -13,22 +13,64 @@
     <link rel="stylesheet" href="src/zhajinhua/styles.css" />
   </head>
   <body>
+    <div class="zjh-atmosphere" aria-hidden="true">
+      <div class="zjh-glow zjh-glow-a"></div>
+      <div class="zjh-glow zjh-glow-b"></div>
+      <div class="zjh-vignette"></div>
+    </div>
+
+    <aside class="zjh-brand">
+      <p class="zjh-brand-kicker">PGame 纸牌馆</p>
+      <h1 class="zjh-brand-title">炸金花</h1>
+      <p class="zjh-brand-tag">闷跟看牌 · 比牌夺池</p>
+    </aside>
+
     <main class="zjh-shell">
       <header class="zjh-top">
-        <a class="zjh-home" href="index.html" aria-label="返回纸牌馆">×</a>
-        <div class="zjh-status">
-          <span id="potBadge">池：0</span>
-          <span id="roundBadge">第 1 轮</span>
-          <span id="stakeBadge">闷注：1000</span>
+        <div class="zjh-top-row" aria-label="开局配置与页面操作">
+          <label class="zjh-config-item">
+            <span>人数</span>
+            <select id="playerCountSelect">
+              <option value="2">2 人</option>
+              <option value="3">3 人</option>
+              <option value="4" selected>4 人</option>
+              <option value="5">5 人</option>
+              <option value="6">6 人</option>
+            </select>
+          </label>
+          <label class="zjh-config-item">
+            <span>张数</span>
+            <select id="cardsSelect">
+              <option value="3" selected>3 张</option>
+              <option value="5">5 张</option>
+            </select>
+          </label>
+          <label class="zjh-config-item">
+            <span>大小王</span>
+            <select id="jokerSelect">
+              <option value="off" selected>不含</option>
+              <option value="on">癞子</option>
+            </select>
+          </label>
+          <button class="zjh-nav-btn js-restart" type="button">重新开始</button>
+          <button class="zjh-nav-btn js-rules" type="button">规则</button>
+          <a class="zjh-nav-btn" href="index.html">返回纸牌馆</a>
         </div>
-        <button id="rulesButton" class="zjh-icon-btn" type="button">规则</button>
       </header>
 
       <section class="zjh-table-wrap" aria-label="炸金花牌桌">
+        <div class="zjh-status" aria-label="牌局状态">
+          <span id="potBadge" class="zjh-pill">池：0</span>
+          <span id="roundBadge" class="zjh-pill">第 1 轮</span>
+          <span id="stakeBadge" class="zjh-pill zjh-pill-wide">闷注：1000</span>
+        </div>
         <div class="zjh-table">
+          <div class="zjh-table-shine" aria-hidden="true"></div>
+          <div class="zjh-table-rail" aria-hidden="true"></div>
           <div id="seats" class="zjh-seats" aria-label="玩家座位"></div>
           <div class="zjh-pot-area">
             <div id="chips" class="zjh-chips" aria-hidden="true"></div>
+            <div class="zjh-pot-label">底池</div>
             <div id="potAmount" class="zjh-pot-amount">0</div>
             <p id="turnHint" class="zjh-turn-hint">准备开始</p>
           </div>
@@ -42,16 +84,23 @@
         <div id="betSizer" class="zjh-bet-sizer hidden" aria-label="设置出筹大小">
           <div class="zjh-bet-sizer-head">
             <span id="betSizerLabel">出筹大小</span>
-            <label class="zjh-bet-input-wrap">
-              <input id="betAmountInput" type="number" inputmode="numeric" min="1000" step="1000" value="1000" aria-label="输入出筹金额" />
-            </label>
+            <div class="zjh-bet-input-row">
+              <button id="betMinusButton" type="button" aria-label="减少筹码">−</button>
+              <label class="zjh-bet-input-wrap">
+                <input
+                  id="betAmountInput"
+                  type="number"
+                  inputmode="numeric"
+                  min="1000"
+                  step="1000"
+                  value="1000"
+                  aria-label="输入出筹金额"
+                />
+              </label>
+              <button id="betPlusButton" type="button" aria-label="增加筹码">+</button>
+            </div>
           </div>
-          <p id="betInputHint" class="zjh-bet-input-hint">可直接输入金额，按闷/看牌步进自动对齐</p>
-          <div id="betChips" class="zjh-bet-chips"></div>
-          <div class="zjh-bet-stepper">
-            <button id="betMinusButton" type="button" aria-label="减少筹码">−</button>
-            <button id="betPlusButton" type="button" aria-label="增加筹码">+</button>
-          </div>
+          <p id="betInputHint" class="zjh-bet-input-hint">可输入金额，不少于 1000，按 1000 对齐</p>
           <button id="callButton" class="zjh-bet-confirm" type="button">出筹码</button>
         </div>
         <div id="actions" class="zjh-actions">
@@ -63,44 +112,12 @@
         <div id="compareTargets" class="zjh-compare-targets hidden"></div>
       </section>
 
-      <details id="logPanel" class="zjh-log-panel">
-        <summary>回合记录</summary>
-        <ol id="log" class="zjh-log"></ol>
-      </details>
-
       <section id="setupScreen" class="zjh-overlay" aria-label="开局设置">
         <div class="zjh-setup-panel">
           <div class="zjh-setup-badge" aria-hidden="true">♦ ♠ ♥ ♣</div>
           <h1>炸金花</h1>
-          <p class="zjh-setup-lead">闷跟看牌，比牌夺池</p>
-
-          <label class="zjh-field">
-            <span>人数</span>
-            <select id="playerCountSelect">
-              <option value="2">2 人</option>
-              <option value="3">3 人</option>
-              <option value="4" selected>4 人</option>
-              <option value="5">5 人</option>
-              <option value="6">6 人</option>
-            </select>
-          </label>
-
-          <label class="zjh-field">
-            <span>每人张数</span>
-            <select id="cardsSelect">
-              <option value="3" selected>3 张</option>
-              <option value="5">5 张（比牌时 5 选 3）</option>
-            </select>
-          </label>
-
-          <label class="zjh-field">
-            <span>大小王</span>
-            <select id="jokerSelect">
-              <option value="off" selected>不含大小王</option>
-              <option value="on">加入大小王作癞子</option>
-            </select>
-          </label>
-
+          <p class="zjh-setup-lead">闷跟看牌 · 比牌夺池</p>
+          <p class="zjh-setup-tip">请先在顶部选择人数、张数与大小王，再开始</p>
           <button id="startButton" class="zjh-start-btn" type="button">开始游戏</button>
           <a class="zjh-setup-home" href="index.html">返回纸牌馆</a>
         </div>
@@ -142,6 +159,7 @@
             <li>每人起始筹码 100000，底注 1000；每次出筹不少于当前跟注额。</li>
             <li>开局牌面朝下。出筹前可选择筹码大小；闷牌按 1000 步进，看牌按 2000 步进。</li>
             <li>闷牌出筹不得低于前一次闷牌筹码；看牌出筹不得低于前一次看牌筹码，且看注至少为闷注两倍。</li>
+            <li>看牌出筹后，闷注须大于该看注的一半（例如看牌出 6000，闷牌至少 4000）。</li>
             <li>第一轮不可比牌，但可以看牌后弃牌。</li>
             <li>看牌玩家可以和已看牌的玩家比牌，但不能主动与闷牌玩家比牌；闷牌玩家可与任意玩家比牌。</li>
             <li>你仍在局中时，他人比牌只显示胜负；自己闷着比牌也不亮牌，只有看牌后再比牌才能看到双方牌面。</li>

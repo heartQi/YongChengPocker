@@ -1,14 +1,15 @@
 :root {
-  --ink: #f6ecd0;
-  --muted: rgba(246, 236, 208, 0.7);
+  --ink: #f7edd4;
+  --muted: rgba(247, 237, 212, 0.68);
   --gold: #e2b34a;
-  --gold-bright: #f3d27a;
-  --felt: #147a5c;
-  --felt-deep: #0b4a3a;
-  --table-rim: #1a1410;
-  --bg: #1a0f24;
+  --gold-bright: #f6d98a;
+  --felt: #128a64;
+  --felt-mid: #0f6b4e;
+  --felt-deep: #084032;
+  --bg: #0a120f;
   --danger: #c94a4a;
   --ok: #3cb37a;
+  --panel: rgba(12, 22, 18, 0.88);
 }
 
 * {
@@ -27,10 +28,7 @@ body {
   overflow: hidden;
   color: var(--ink);
   font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  background:
-    radial-gradient(ellipse at 50% 20%, rgba(80, 40, 90, 0.45), transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(20, 80, 60, 0.25), transparent 40%),
-    linear-gradient(180deg, #140a1c 0%, #1c1028 45%, #0d0814 100%);
+  background: #070d0b;
 }
 
 button,
@@ -42,78 +40,248 @@ select {
   display: none !important;
 }
 
+.zjh-atmosphere {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(226, 179, 74, 0.16), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 50% 110%, rgba(18, 120, 88, 0.35), transparent 55%),
+    linear-gradient(165deg, #06110e 0%, #0c1a16 48%, #050a09 100%);
+}
+
+.zjh-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  opacity: 0.45;
+  animation: zjh-glow-drift 14s ease-in-out infinite alternate;
+}
+
+.zjh-glow-a {
+  width: min(50vw, 360px);
+  height: min(50vw, 360px);
+  left: -12%;
+  top: 22%;
+  background: rgba(226, 179, 74, 0.18);
+}
+
+.zjh-glow-b {
+  width: min(55vw, 400px);
+  height: min(55vw, 400px);
+  right: -14%;
+  bottom: 8%;
+  background: rgba(15, 107, 82, 0.28);
+  animation-delay: -5s;
+}
+
+.zjh-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(0, 0, 0, 0.45) 100%);
+}
+
 .zjh-shell {
+  position: relative;
+  z-index: 1;
   height: 100vh;
   height: 100svh;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
-  gap: 8px;
-  padding: 10px 12px 12px;
-  max-width: 520px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  max-width: 640px;
   margin: 0 auto;
+}
+
+.zjh-brand {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(14px, env(safe-area-inset-left));
+  z-index: 4;
+  text-align: left;
+  pointer-events: none;
+  max-width: min(42vw, 220px);
+}
+
+.zjh-brand-kicker {
+  margin: 0 0 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.zjh-brand-title {
+  margin: 0;
+  font-family: "ZCOOL QingKe HuangYou", "Noto Sans SC", sans-serif;
+  font-size: clamp(26px, 5.5vw, 40px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  color: var(--gold-bright);
+  text-shadow:
+    0 2px 0 rgba(80, 50, 10, 0.45),
+    0 0 24px rgba(226, 179, 74, 0.35);
+}
+
+.zjh-brand-tag {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: rgba(247, 237, 212, 0.78);
 }
 
 .zjh-top {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 64px;
 }
 
-.zjh-home {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+.zjh-top-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  align-items: stretch;
+}
+
+.zjh-nav-btn {
+  min-height: 40px;
+  padding: 0 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(226, 179, 74, 0.4);
+  background: linear-gradient(180deg, rgba(40, 32, 18, 0.9), rgba(16, 14, 10, 0.95));
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
   display: grid;
   place-items: center;
-  text-decoration: none;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 22px;
-  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.zjh-nav-btn:hover {
+  border-color: var(--gold-bright);
+}
+
+.zjh-nav-btn:active {
+  transform: scale(0.98);
+}
+
+.zjh-config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(226, 179, 74, 0.28);
+  background: rgba(0, 0, 0, 0.32);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.zjh-config-item span {
+  letter-spacing: 0.08em;
+}
+
+.zjh-config-item select {
+  width: 100%;
+  min-height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(226, 179, 74, 0.35);
+  background: #0e1612;
+  color: var(--gold-bright);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 0 6px;
 }
 
 .zjh-status {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 10px;
+  gap: 6px;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--gold-bright);
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
 }
 
-.zjh-icon-btn {
-  min-height: 36px;
-  padding: 0 12px;
-  border-radius: 18px;
-  border: 1px solid rgba(226, 179, 74, 0.4);
-  background: rgba(0, 0, 0, 0.25);
-  color: var(--ink);
-  cursor: pointer;
+.zjh-setup-tip {
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.zjh-pill {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--gold-bright);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(226, 179, 74, 0.28);
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+}
+
+.zjh-pill-wide {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .zjh-table-wrap {
   min-height: 0;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
   place-items: center;
+  width: 100%;
 }
 
 .zjh-table {
   position: relative;
-  width: min(100%, 420px);
-  aspect-ratio: 3 / 4.1;
-  border-radius: 50% / 42%;
+  width: min(100%, 520px, calc(min(56svh, 100%) * 5 / 4));
+  aspect-ratio: 5 / 4;
+  max-height: 100%;
+  border-radius: 50% / 46%;
   background:
-    radial-gradient(ellipse at 50% 45%, rgba(40, 160, 120, 0.35), transparent 55%),
-    radial-gradient(ellipse at 50% 50%, var(--felt) 0%, var(--felt-deep) 78%);
+    radial-gradient(ellipse at 50% 38%, rgba(70, 200, 150, 0.22), transparent 48%),
+    radial-gradient(ellipse at 50% 55%, var(--felt) 0%, var(--felt-mid) 45%, var(--felt-deep) 82%);
   box-shadow:
-    0 0 0 8px #2a2118,
-    0 0 0 11px rgba(226, 179, 74, 0.55),
-    0 0 0 16px #120e0a,
-    0 24px 50px rgba(0, 0, 0, 0.55),
-    inset 0 0 40px rgba(0, 0, 0, 0.28);
+    0 0 0 6px #2c2216,
+    0 0 0 9px rgba(226, 179, 74, 0.7),
+    0 0 0 14px #100c08,
+    0 24px 48px rgba(0, 0, 0, 0.55),
+    inset 0 0 50px rgba(0, 0, 0, 0.3),
+    inset 0 18px 40px rgba(255, 255, 255, 0.04);
+}
+
+.zjh-table-shine {
+  position: absolute;
+  inset: 10% 16% auto;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.zjh-table-rail {
+  position: absolute;
+  inset: 7%;
+  border-radius: 50% / 46%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
 }
 
 .zjh-seats {
@@ -141,21 +309,10 @@ select {
 }
 
 .zjh-seat.is-human {
-  /* 自己座位上移，避免压住底部手牌 */
   z-index: 1;
-  width: 88px;
-  gap: 2px;
-  transform: translate(-50%, -100%);
 }
 
-.zjh-seat.is-human .zjh-avatar {
-  width: 44px;
-  height: 44px;
-  font-size: 18px;
-}
-
-.zjh-seat.is-human .zjh-chips-bal,
-.zjh-seat.is-human .zjh-seat-status {
+.zjh-seat.is-human .zjh-mini-hand {
   display: none;
 }
 
@@ -168,17 +325,17 @@ select {
 .zjh-avatar {
   width: 52px;
   height: 52px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 2px solid var(--gold);
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.15), transparent),
-    linear-gradient(160deg, #3a2a18, #1a120c);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.18), transparent 50%),
+    linear-gradient(160deg, #4a3520, #1a120c);
   display: grid;
   place-items: center;
   font-family: "ZCOOL QingKe HuangYou", sans-serif;
   font-size: 22px;
   color: var(--gold-bright);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .zjh-chips-bal {
@@ -234,10 +391,6 @@ select {
 .zjh-status-tag.is-blind {
   color: var(--muted);
   border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.zjh-seat.is-human .zjh-mini-hand {
-  display: none;
 }
 
 .zjh-card-back,
@@ -315,9 +468,17 @@ select {
   left: 50%;
   top: 48%;
   transform: translate(-50%, -50%);
-  width: 70%;
+  width: 72%;
   text-align: center;
   pointer-events: none;
+}
+
+.zjh-pot-label {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 700;
+  margin-bottom: 2px;
 }
 
 .zjh-chips {
@@ -347,24 +508,33 @@ select {
 
 .zjh-pot-amount {
   font-family: "ZCOOL QingKe HuangYou", sans-serif;
-  font-size: 22px;
+  font-size: 28px;
   color: var(--gold-bright);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55), 0 0 20px rgba(226, 179, 74, 0.25);
+  letter-spacing: 0.04em;
 }
 
 .zjh-turn-hint {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+  padding: 4px 12px;
+  display: inline-block;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.28);
 }
 
 .zjh-hand-panel {
   position: relative;
   z-index: 6;
-  border: 1px solid rgba(226, 179, 74, 0.35);
-  border-radius: 12px;
-  padding: 10px;
-  background: linear-gradient(180deg, rgba(30, 20, 40, 0.92), rgba(16, 10, 24, 0.96));
+  border: 1px solid rgba(226, 179, 74, 0.38);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 40%),
+    linear-gradient(165deg, rgba(18, 36, 30, 0.96), rgba(8, 16, 13, 0.98));
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .zjh-my-meta {
@@ -398,6 +568,7 @@ select {
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
   padding: 0;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
 }
 
 .zjh-my-card.back {
@@ -450,8 +621,8 @@ select {
 }
 
 .zjh-bet-sizer {
-  margin-bottom: 10px;
-  padding: 10px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid rgba(226, 179, 74, 0.35);
   background: rgba(0, 0, 0, 0.22);
@@ -461,9 +632,33 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 4px;
   font-size: 13px;
   font-weight: 800;
+}
+
+.zjh-bet-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zjh-bet-input-row > button {
+  width: 34px;
+  min-height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.zjh-bet-input-row > button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .zjh-bet-input-wrap {
@@ -473,15 +668,15 @@ select {
 }
 
 .zjh-bet-input-wrap input {
-  width: 120px;
-  min-height: 36px;
-  padding: 0 10px;
+  width: 100px;
+  min-height: 34px;
+  padding: 0 8px;
   border-radius: 8px;
   border: 1px solid rgba(226, 179, 74, 0.55);
   background: #120e18;
   color: var(--gold-bright);
   font-family: "ZCOOL QingKe HuangYou", "Noto Sans SC", sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 400;
   text-align: right;
 }
@@ -499,64 +694,14 @@ select {
   text-align: right;
 }
 
-.zjh-bet-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.zjh-chip-pick {
-  min-width: 58px;
-  min-height: 34px;
-  padding: 0 10px;
-  border-radius: 17px;
-  border: 1px solid rgba(226, 179, 74, 0.4);
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12), transparent 50%),
-    linear-gradient(180deg, #3a2a18, #1a120c);
-  color: var(--ink);
-  font-weight: 800;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.zjh-chip-pick.is-selected {
-  border-color: var(--gold-bright);
-  color: #1a1208;
-  background: linear-gradient(180deg, #ffe08a, #d4a017);
-  box-shadow: 0 0 0 1px rgba(226, 179, 74, 0.35);
-}
-
-.zjh-bet-stepper {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-
-.zjh-bet-stepper button {
-  min-height: 34px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--ink);
-  font-size: 20px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.zjh-bet-stepper button:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
 .zjh-bet-confirm {
   width: 100%;
-  min-height: 48px;
-  margin-top: 10px;
+  min-height: 44px;
+  margin-top: 0;
   border: none;
   border-radius: 10px;
   font-weight: 900;
-  font-size: 17px;
+  font-size: 16px;
   letter-spacing: 0.08em;
   cursor: pointer;
   color: #1a1208;
@@ -577,18 +722,24 @@ select {
 .zjh-actions {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
 }
 
 .zjh-actions button {
-  min-height: 40px;
+  min-height: 42px;
   border: 1px solid rgba(226, 179, 74, 0.4);
-  border-radius: 8px;
-  background: linear-gradient(180deg, rgba(60, 44, 28, 0.95), rgba(28, 20, 14, 0.98));
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(56, 44, 26, 0.95), rgba(22, 18, 12, 0.98));
   color: var(--ink);
   font-weight: 800;
-  font-size: 13px;
+  font-size: 14px;
+  letter-spacing: 0.06em;
   cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.zjh-actions button:not(:disabled):active {
+  transform: scale(0.97);
 }
 
 @keyframes bet-confirm-pulse {
@@ -634,32 +785,6 @@ select {
   cursor: pointer;
 }
 
-.zjh-log-panel {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.28);
-  color: var(--muted);
-  font-size: 12px;
-  max-height: 96px;
-  overflow: auto;
-}
-
-.zjh-log-panel summary {
-  cursor: pointer;
-  padding: 8px 10px;
-  font-weight: 800;
-  color: var(--ink);
-}
-
-.zjh-log {
-  margin: 0;
-  padding: 0 10px 8px 28px;
-}
-
-.zjh-log li {
-  margin-bottom: 4px;
-}
-
 .zjh-overlay {
   position: fixed;
   inset: 0;
@@ -675,20 +800,23 @@ select {
 .zjh-victory-panel,
 .zjh-rules-panel {
   width: min(400px, 100%);
-  padding: 28px 24px;
-  border-radius: 16px;
-  border: 1px solid rgba(226, 179, 74, 0.45);
+  padding: 30px 26px;
+  border-radius: 18px;
+  border: 1px solid rgba(226, 179, 74, 0.5);
   background:
-    linear-gradient(160deg, rgba(40, 28, 20, 0.98), rgba(16, 12, 22, 0.98));
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 36%),
+    linear-gradient(160deg, rgba(28, 40, 34, 0.98), rgba(10, 16, 14, 0.99));
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(226, 179, 74, 0.08);
   text-align: center;
+  animation: zjh-panel-in 0.4s ease both;
 }
 
 .zjh-setup-badge {
   color: var(--gold);
-  letter-spacing: 0.35em;
+  letter-spacing: 0.4em;
   font-size: 18px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  opacity: 0.9;
 }
 
 .zjh-setup-panel h1,
@@ -696,10 +824,10 @@ select {
 .zjh-rules-panel h2 {
   margin: 0;
   font-family: "ZCOOL QingKe HuangYou", sans-serif;
-  font-size: 42px;
+  font-size: 46px;
   font-weight: 400;
-  letter-spacing: 0.12em;
-  background: linear-gradient(180deg, #fff6d4, var(--gold));
+  letter-spacing: 0.16em;
+  background: linear-gradient(180deg, #fff8dc, var(--gold) 55%, #b8862a);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -707,9 +835,10 @@ select {
 
 .zjh-setup-lead,
 .zjh-eyebrow {
-  margin: 8px 0 20px;
+  margin: 10px 0 22px;
   color: var(--muted);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
+  font-weight: 700;
 }
 
 .zjh-field {
@@ -735,17 +864,23 @@ select {
 .zjh-start-btn,
 .zjh-victory-actions button {
   width: 100%;
-  min-height: 48px;
-  margin-top: 10px;
+  min-height: 50px;
+  margin-top: 12px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-weight: 900;
   font-size: 18px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
   cursor: pointer;
   color: #1a1208;
-  background: linear-gradient(180deg, #ffe08a, #d4a017);
-  box-shadow: 0 8px 20px rgba(212, 160, 23, 0.35);
+  background: linear-gradient(180deg, #ffe8a0, #d4a017 70%, #b8861a);
+  box-shadow: 0 10px 24px rgba(212, 160, 23, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.zjh-start-btn:active,
+.zjh-victory-actions button:active {
+  transform: scale(0.98);
 }
 
 .zjh-setup-home {
@@ -802,16 +937,26 @@ select {
 }
 
 /* 座位布局：最多 6 人，相对椭圆桌面百分比定位 */
-.zjh-seat[data-slot="0"] { left: 50%; top: 78%; }   /* 自己 - 底，偏上以免挡手牌 */
-.zjh-seat[data-slot="1"] { left: 14%; top: 68%; }   /* 左下 */
-.zjh-seat[data-slot="2"] { left: 14%; top: 32%; }   /* 左上 */
-.zjh-seat[data-slot="3"] { left: 50%; top: 14%; }   /* 顶 */
-.zjh-seat[data-slot="4"] { left: 86%; top: 32%; }   /* 右上 */
-.zjh-seat[data-slot="5"] { left: 86%; top: 68%; }   /* 右下 */
+.zjh-seat[data-slot="0"] { left: 50%; top: 86%; }   /* 自己 - 底 */
+.zjh-seat[data-slot="1"] { left: 12%; top: 66%; }   /* 左下 */
+.zjh-seat[data-slot="2"] { left: 12%; top: 30%; }   /* 左上 */
+.zjh-seat[data-slot="3"] { left: 50%; top: 12%; }   /* 顶 */
+.zjh-seat[data-slot="4"] { left: 88%; top: 30%; }   /* 右上 */
+.zjh-seat[data-slot="5"] { left: 88%; top: 66%; }   /* 右下 */
 
 @keyframes chip-pop {
   from { transform: scale(0.4); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes zjh-glow-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(18px, -14px) scale(1.06); }
+}
+
+@keyframes zjh-panel-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: none; }
 }
 
 .zjh-fx-layer {
@@ -992,9 +1137,65 @@ select {
   to { opacity: 1; transform: none; }
 }
 
+@media (min-width: 900px) {
+  .zjh-top {
+    padding-top: 8px;
+  }
+
+  .zjh-brand {
+    max-width: 260px;
+  }
+
+  .zjh-brand-title {
+    font-size: 42px;
+  }
+
+  .zjh-brand-tag {
+    font-size: 12px;
+  }
+}
+
 @media (max-width: 420px) {
+  .zjh-brand {
+    max-width: 46vw;
+  }
+
+  .zjh-brand-title {
+    font-size: 24px;
+    letter-spacing: 0.12em;
+  }
+
+  .zjh-brand-tag {
+    font-size: 10px;
+  }
+
+  .zjh-top {
+    padding-top: 58px;
+  }
+
   .zjh-actions {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .zjh-top-row {
+    gap: 4px;
+  }
+
+  .zjh-config-item {
+    padding: 4px 5px;
+    font-size: 10px;
+  }
+
+  .zjh-config-item select {
+    min-height: 26px;
+    font-size: 11px;
+    padding: 0 2px;
+  }
+
+  .zjh-nav-btn {
+    min-height: 0;
+    font-size: 10px;
+    padding: 0 2px;
   }
 
   .zjh-seat {

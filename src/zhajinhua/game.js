@@ -121,7 +121,7 @@ export function createGame(options = {}) {
     minBet: MIN_BET,
     /** 闷牌最低本轮下注（不得低于前一次闷牌筹码） */
     blindCallLevel: MIN_BET,
-    /** 看牌最低本轮下注（不得低于前一次看牌筹码，且至少闷注×2） */
+    /** 看牌最低本轮下注（不得低于前一次看牌筹码；闷牌加注时至少闷注×2） */
     seenCallLevel: MIN_BET * 2,
     /** 兼容旧字段：等同闷注水位 */
     blindStake: MIN_BET,
@@ -197,13 +197,14 @@ export function updateStakeLevels(state, playerId) {
   const paid = player.betThisRound;
   if (player.isBlind) {
     state.blindCallLevel = Math.max(state.blindCallLevel, paid);
+    // 闷牌加注后，看注至少为闷注两倍
     state.seenCallLevel = Math.max(state.seenCallLevel, state.blindCallLevel * 2);
   } else {
     state.seenCallLevel = Math.max(state.seenCallLevel, paid);
-    // 看牌加注后，闷注至少为看注一半（保持「看=闷×2」关系）
-    const half = Math.ceil(state.seenCallLevel / 2 / state.minBet) * state.minBet;
-    state.blindCallLevel = Math.max(state.blindCallLevel, half);
-    state.seenCallLevel = Math.max(state.seenCallLevel, state.blindCallLevel * 2);
+    // 看牌出筹后，闷注须大于该看注的一半（按底注对齐，例如看 6000 → 闷至少 4000）
+    const blindFromSeen =
+      Math.floor(state.seenCallLevel / 2 / state.minBet) * state.minBet + state.minBet;
+    state.blindCallLevel = Math.max(state.blindCallLevel, blindFromSeen);
   }
   state.callLevel = state.blindCallLevel;
   state.blindStake = state.blindCallLevel;
