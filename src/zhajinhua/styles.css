@@ -284,9 +284,72 @@ select {
   pointer-events: none;
 }
 
+.zjh-table-bets {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.zjh-table-bet {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translate(-50%, -50%);
+}
+
+/* 座位内侧靠桌心，摆本轮出筹 */
+.zjh-table-bet[data-slot="0"] { left: 50%; top: 68%; }
+.zjh-table-bet[data-slot="1"] { left: 28%; top: 58%; }
+.zjh-table-bet[data-slot="2"] { left: 28%; top: 38%; }
+.zjh-table-bet[data-slot="3"] { left: 50%; top: 28%; }
+.zjh-table-bet[data-slot="4"] { left: 72%; top: 38%; }
+.zjh-table-bet[data-slot="5"] { left: 72%; top: 58%; }
+
+.zjh-table-chip-stack {
+  position: relative;
+  width: 36px;
+  height: 28px;
+}
+
+.zjh-table-chip {
+  position: absolute;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  margin-left: -15px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 8px;
+  font-weight: 900;
+  color: #1a1208;
+  border: 2px dashed rgba(255, 255, 255, 0.35);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+  bottom: calc(var(--i, 0) * 4px);
+}
+
+.zjh-table-chip.gold { background: radial-gradient(circle at 35% 30%, #ffe08a, #d4a017); }
+.zjh-table-chip.silver { background: radial-gradient(circle at 35% 30%, #f0f0f0, #9aa0a6); }
+.zjh-table-chip.bronze { background: radial-gradient(circle at 35% 30%, #f0c090, #b87333); }
+
+.zjh-table-bet-amount {
+  font-size: 11px;
+  font-weight: 900;
+  color: #ffe9a8;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 179, 74, 0.35);
+}
+
 .zjh-seats {
   position: absolute;
   inset: 0;
+  z-index: 3;
 }
 
 .zjh-seat {
@@ -312,10 +375,6 @@ select {
   z-index: 1;
 }
 
-.zjh-seat.is-human .zjh-mini-hand {
-  display: none;
-}
-
 .zjh-name {
   font-size: 12px;
   font-weight: 800;
@@ -336,6 +395,7 @@ select {
   font-size: 22px;
   color: var(--gold-bright);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .zjh-chips-bal {
@@ -351,10 +411,23 @@ select {
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
-  gap: 3px;
   position: relative;
   min-height: 44px;
+  min-width: 52px;
   align-items: center;
+  padding-left: 0;
+}
+
+.zjh-mini-hand .zjh-card-back,
+.zjh-mini-hand .zjh-card-face {
+  margin-left: -16px;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.35);
+  z-index: calc(1 + var(--i, 0));
+}
+
+.zjh-mini-hand .zjh-card-back:first-child,
+.zjh-mini-hand .zjh-card-face:first-child {
+  margin-left: 0;
 }
 
 .zjh-seat-status {
@@ -560,6 +633,12 @@ select {
   z-index: 1;
 }
 
+.zjh-my-cards.hidden {
+  display: none !important;
+  min-height: 0;
+  margin-bottom: 0;
+}
+
 .zjh-my-card {
   width: 58px;
   height: 84px;
@@ -748,8 +827,10 @@ select {
 }
 
 .zjh-actions button:disabled {
-  opacity: 0.35;
+  opacity: 0.55;
   cursor: not-allowed;
+  font-size: 12px;
+  letter-spacing: 0;
 }
 
 .zjh-actions button.is-ready:not(:disabled) {
@@ -766,23 +847,79 @@ select {
   background: linear-gradient(180deg, #2f8f62, #1a5c40);
 }
 
+.zjh-seat.is-compare-target {
+  cursor: pointer;
+  z-index: 3;
+}
+
+.zjh-seat.is-compare-target .zjh-avatar {
+  box-shadow: 0 0 0 3px #f0c14a, 0 0 20px rgba(240, 193, 74, 0.55);
+  animation: compare-target-pulse 1.1s ease-in-out infinite;
+}
+
+.zjh-seat.is-compare-target::after {
+  content: "点我比牌";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  transform: translate(-50%, 100%);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+  color: #1a1208;
+  background: var(--gold-bright);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes compare-target-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
 .zjh-compare-targets {
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 20px));
+  z-index: 16;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
   justify-content: center;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 179, 74, 0.5);
+  background: rgba(8, 14, 12, 0.94);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+.zjh-compare-pick-title {
+  width: 100%;
+  margin: 0 0 2px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--gold-bright);
 }
 
 .zjh-compare-targets button {
-  min-height: 34px;
+  min-height: 36px;
   padding: 0 12px;
-  border-radius: 16px;
+  border-radius: 10px;
   border: 1px solid var(--gold);
   background: rgba(0, 0, 0, 0.35);
   color: var(--ink);
   font-weight: 700;
   cursor: pointer;
+}
+
+.zjh-compare-targets button.zjh-compare-cancel {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--muted);
 }
 
 .zjh-overlay {

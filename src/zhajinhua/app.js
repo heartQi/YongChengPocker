@@ -9,6 +9,7 @@ import {
   canLook,
   cardLabel,
   compareTargets,
+  compareUnavailableReason,
   createGame,
   describeHand,
   fold,
@@ -27,6 +28,11 @@ let selectedCardIds = [];
 let pickingCompare = false;
 let fxPlaying = false;
 let selectedPayAmount = 0;
+/** 临时查看自己的牌面（不常驻） */
+let peekingCards = false;
+/** 第一次看牌后亮牌，直到出筹再收起 */
+let peekUntilBet = false;
+let peekHideTimer = null;
 
 const DELAY = {
   think: 1400,
@@ -51,8 +57,8 @@ const cardsSelect = document.querySelector("#cardsSelect");
 const jokerSelect = document.querySelector("#jokerSelect");
 const startButton = document.querySelector("#startButton");
 const seatsEl = document.querySelector("#seats");
-const chipsEl = document.querySelector("#chips");
 const potAmountEl = document.querySelector("#potAmount");
+const tableBetsEl = document.querySelector("#tableBets");
 const potBadgeEl = document.querySelector("#potBadge");
 const roundBadgeEl = document.querySelector("#roundBadge");
 const stakeBadgeEl = document.querySelector("#stakeBadge");
@@ -126,10 +132,55 @@ rulesScreen.addEventListener("click", (e) => {
 });
 
 lookButton.addEventListener("click", () => {
-  if (!canActNow() || !canLook(state, 0)) return;
-  lookCards(state, 0);
-  afterHumanAction();
+  if (!state || !started || fxPlaying) return;
+  const me = state.players[0];
+  if (!me?.hand?.length) return;
+
+  // 尚未看牌：执行看牌规则，亮牌直到本次出筹
+  if (canLook(state, 0) && canActNow()) {
+    lookCards(state, 0);
+    showPeekCards({ untilBet: true });
+    afterHumanAction({ keepPeek: true });
+    return;
+  }
+
+  // 已看过牌：每次点击临时查看 / 收起
+  if (!me.isBlind) {
+    if (peekingCards) {
+      hidePeekCards();
+    } else {
+      showPeekCards({ untilBet: false });
+    }
+    render();
+  }
 });
+
+function showPeekCards({ untilBet = false } = {}) {
+  peekingCards = true;
+  peekUntilBet = untilBet;
+  clearPeekHideTimer();
+  if (!untilBet) {
+    peekHideTimer = setTimeout(() => {
+      peekHideTimer = null;
+      peekingCards = false;
+      renderMyCards();
+      renderActions();
+    }, 2800);
+  }
+}
+
+function hidePeekCards() {
+  peekingCards = false;
+  peekUntilBet = false;
+  clearPeekHideTimer();
+}
+
+function clearPeekHideTimer() {
+  if (peekHideTimer) {
+    clearTimeout(peekHideTimer);
+    peekHideTimer = null;
+  }
+}
 
 callButton.addEventListener("click", () => {
   if (!canActNow() || !canCall(state, 0)) return;
@@ -139,6 +190,8 @@ callButton.addEventListener("click", () => {
   const pay = normalizePayAmount(state, 0, raw);
   selectedPayAmount = pay;
   if (!placeBet(state, 0, pay)) return;
+  // 出筹后收起第一次看牌亮出的牌面
+  hidePeekCards();
   afterHumanAction();
 });
 
@@ -190,7 +243,10 @@ foldButton.addEventListener("click", () => {
 compareButton.addEventListener("click", () => {
   if (!canActNow()) return;
   const targets = compareTargets(state, 0);
-  if (!targets.length) return;
+  if (!targets.length) {
+    hintEl.textContent = compareUnavailableReason(state, 0) || "当前不能比牌";
+    return;
+  }
   pickingCompare = !pickingCompare;
   render();
 });
@@ -212,6 +268,23 @@ compareTargetsEl.addEventListener("click", (event) => {
   const btn = event.target.closest("[data-target-id]");
   if (!btn || !canActNow()) return;
   const targetId = Number(btn.dataset.targetId);
+  if (btn.dataset.cancel === "1") {
+    pickingCompare = false;
+    render();
+    return;
+  }
+  if (!canCompare(state, 0, targetId)) return;
+  pickingCompare = false;
+  selectedCardIds = [];
+  requestCompare(state, 0, targetId);
+  afterHumanAction();
+});
+
+seatsEl.addEventListener("click", (event) => {
+  if (!pickingCompare || !canActNow()) return;
+  const seat = event.target.closest("[data-player-id]");
+  if (!seat) return;
+  const targetId = Number(seat.dataset.playerId);
   if (!canCompare(state, 0, targetId)) return;
   pickingCompare = false;
   selectedCardIds = [];
@@ -225,6 +298,7 @@ function canActNow() {
 
 function startGame({ keepChips = false } = {}) {
   clearAiTimer();
+  hidePeekCards();
   hideCompareOverlay();
   fxPlaying = false;
   const playerCount = Number(playerCountSelect.value);
@@ -260,8 +334,9 @@ function syncSelectedPayAmount() {
   if (selectedPayAmount < minPay) selectedPayAmount = minPay;
 }
 
-async function afterHumanAction() {
+async function afterHumanAction({ keepPeek = false } = {}) {
   pickingCompare = false;
+  if (!keepPeek) hidePeekCards();
   render();
   await playLastActionFx();
   scheduleAi();
@@ -538,13 +613,13 @@ function cardFaceHtml(card, sizeClass = "zjh-card-face") {
 
 function render() {
   if (!state) return;
-  potBadgeEl.textContent = `池：${formatChips(state.pot)}`;
+  potBadgeEl.textContent = `总筹码：${formatChips(state.pot)}`;
   roundBadgeEl.textContent = `第 ${state.roundCount} 轮`;
   stakeBadgeEl.textContent = `闷注：${formatChips(state.blindCallLevel ?? state.callLevel)} / 看注：${formatChips(state.seenCallLevel ?? state.callLevel * 2)}`;
   potAmountEl.textContent = formatChips(state.pot);
   turnHintEl.textContent = turnText();
   renderSeats();
-  renderChips();
+  renderTableBets();
   renderMyMeta();
   renderMyCards();
   renderActions();
@@ -581,10 +656,16 @@ function renderSeats() {
     if (state.currentPlayerId === player.id && state.status !== "finished" && !fxPlaying) {
       seat.classList.add("is-turn");
     }
+    if (pickingCompare && canCompare(state, 0, player.id)) {
+      seat.classList.add("is-compare-target");
+    }
 
-    // 自己的牌只在底部大手牌区展示，座位上不重复画牌面，避免和手牌重叠
+    // 自己与他人一样在座位上叠放牌背；看牌后牌面在底部显示
     let handBlock = "";
     if (player.id === 0) {
+      const cardsHtml = player.hand
+        .map((_, i) => `<span class="zjh-card-back" style="--i:${i}"></span>`)
+        .join("");
       let status = "";
       if (player.folded) {
         status = player.eliminated
@@ -592,15 +673,20 @@ function renderSeats() {
           : `<span class="zjh-status-tag is-fold">弃牌</span>`;
       } else if (!player.isBlind) status = `<span class="zjh-status-tag is-look">已看牌</span>`;
       else status = `<span class="zjh-status-tag is-blind">闷牌中</span>`;
-      handBlock = `<div class="zjh-seat-status">${status}</div>`;
+      handBlock = `<div class="zjh-mini-hand">${cardsHtml}</div><div class="zjh-seat-status">${status}</div>`;
     } else {
       const showFace = spectatorReveal;
-      // 座位小牌最多显示 3 张牌背/牌面，五张模式也不换行堆叠
+      // 重叠摆放，张数一目了然（3/5 张都全显示）
       const cardsHtml = player.hand
-        .slice(0, 3)
-        .map((card) => {
-          if (showFace) return cardFaceHtml(card);
-          return `<span class="zjh-card-back"></span>`;
+        .map((card, i) => {
+          const style = `style="--i:${i}"`;
+          if (showFace) {
+            if (card.isJoker) {
+              return `<span class="zjh-card-face joker ${card.color}" ${style}><span>${card.rank}</span><span>癞</span></span>`;
+            }
+            return `<span class="zjh-card-face ${card.color}" ${style}><span>${card.rank}</span><span>${card.suitSymbol}</span></span>`;
+          }
+          return `<span class="zjh-card-back" ${style}></span>`;
         })
         .join("");
       let banner = "";
@@ -624,38 +710,60 @@ function renderSeats() {
   });
 }
 
-function renderChips() {
-  chipsEl.innerHTML = "";
-  if (!state.pot) return;
-  // 按真实底池拆成 5K / 2K / 1K，开局只有底注时只会看到 1K
-  const stack = splitPotChips(state.pot).slice(0, 10);
-  stack.forEach((denom, i) => {
-    const chip = document.createElement("span");
-    chip.className = `zjh-chip ${denom === 5000 ? "gold" : denom === 2000 ? "silver" : "bronze"}`;
-    chip.textContent = denom === 5000 ? "5K" : denom === 2000 ? "2K" : "1K";
-    chip.style.left = `${18 + (i % 4) * 16 + (i > 3 ? 8 : 0)}%`;
-    chip.style.top = `${10 + Math.floor(i / 4) * 18 + (i % 3) * 4}px`;
-    chipsEl.append(chip);
+/** 座位上展示「最近一轮」该玩家出的筹：本轮进行中用 betThisRound，否则用上一轮记录 */
+function seatRoundBetAmount(player) {
+  const anyCurrentBet = state.players.some((p) => (p.betThisRound || 0) > 0);
+  if (anyCurrentBet) return player.betThisRound || 0;
+  return player.lastRoundBet || 0;
+}
+
+/** 在牌桌绿毡上，于各座位内侧摆放最近一轮出筹筹码 */
+function renderTableBets() {
+  if (!tableBetsEl) return;
+  tableBetsEl.innerHTML = "";
+  if (!state) return;
+  const slots = seatSlots(state.playerCount);
+
+  state.players.forEach((player, index) => {
+    const amount = seatRoundBetAmount(player);
+    if (amount <= 0) return;
+    const slot = slots[index];
+    const pile = document.createElement("div");
+    pile.className = "zjh-table-bet";
+    pile.dataset.slot = String(slot);
+    pile.dataset.playerId = String(player.id);
+
+    const stack = splitBetChips(amount).slice(0, 4);
+    const chipsHtml = stack
+      .map((denom, i) => {
+        const tier = denom >= 5000 ? "gold" : denom >= 2000 ? "silver" : "bronze";
+        const label = denom >= 5000 ? "5K" : denom >= 2000 ? "2K" : "1K";
+        return `<span class="zjh-table-chip ${tier}" style="--i:${i}">${label}</span>`;
+      })
+      .join("");
+
+    pile.innerHTML = `
+      <div class="zjh-table-chip-stack" aria-hidden="true">${chipsHtml}</div>
+      <span class="zjh-table-bet-amount">${formatChips(amount)}</span>
+    `;
+    tableBetsEl.append(pile);
   });
 }
 
-/** 把底池金额拆成筹码面额；筹码少时全用 1K（与底注一致），多了再合并成 2K/5K */
-function splitPotChips(pot) {
-  let units = Math.floor(pot / 1000);
+function splitBetChips(amount) {
+  let units = Math.floor(amount / 1000);
   if (units <= 0) return [];
-  if (units <= 8) {
-    return Array.from({ length: units }, () => 1000);
-  }
+  if (units <= 4) return Array.from({ length: units }, () => 1000);
   const chips = [];
-  while (units >= 5) {
+  while (units >= 5 && chips.length < 4) {
     chips.push(5000);
     units -= 5;
   }
-  while (units >= 2) {
+  while (units >= 2 && chips.length < 4) {
     chips.push(2000);
     units -= 2;
   }
-  while (units >= 1) {
+  while (units >= 1 && chips.length < 4) {
     chips.push(1000);
     units -= 1;
   }
@@ -667,7 +775,7 @@ function renderMyMeta() {
   myMetaEl.innerHTML = "";
   if (!state || !started) return;
   const me = state.players[0];
-  // 筹码已在座位上与其他人一致显示，这里只补状态标签
+  // 剩余筹码已在座位显示，这里只补状态
   const tag = document.createElement("span");
   if (me.folded) {
     tag.className = `zjh-status-tag ${me.eliminated ? "is-out" : "is-fold"}`;
@@ -684,7 +792,10 @@ function renderMyMeta() {
 
 function renderMyCards() {
   myCardsEl.innerHTML = "";
-  if (!state) return;
+  if (!state || !started) {
+    myCardsEl.classList.add("hidden");
+    return;
+  }
   const me = state.players[0];
   const selecting =
     state.status === "selecting" &&
@@ -692,20 +803,19 @@ function renderMyCards() {
     ((state.selectPending.phase === "actor" && state.selectPending.actorId === 0) ||
       (state.selectPending.phase === "target" && state.selectPending.targetId === 0));
 
+  // 仅临时查看或选牌时显示；看牌后不常驻
+  const showHand = selecting || peekingCards;
+  myCardsEl.classList.toggle("hidden", !showHand);
+  if (!showHand) return;
+
   me.hand.forEach((card) => {
     const btn = document.createElement("button");
     btn.type = "button";
-    const canSee = !me.isBlind || me.folded || state.status === "finished" || selecting;
-    if (canSee) {
-      btn.className = `zjh-my-card face ${card.color}${card.isJoker ? " joker" : ""}`;
-      btn.innerHTML = card.isJoker
-        ? `<span class="rank">${card.rank}</span><span class="suit">癞</span>`
-        : `<span class="rank">${card.rank}</span><span class="suit">${card.suitSymbol}</span>`;
-      btn.setAttribute("aria-label", cardLabel(card));
-    } else {
-      btn.className = "zjh-my-card back";
-      btn.setAttribute("aria-label", "牌背");
-    }
+    btn.className = `zjh-my-card face ${card.color}${card.isJoker ? " joker" : ""}`;
+    btn.innerHTML = card.isJoker
+      ? `<span class="rank">${card.rank}</span><span class="suit">癞</span>`
+      : `<span class="rank">${card.rank}</span><span class="suit">${card.suitSymbol}</span>`;
+    btn.setAttribute("aria-label", cardLabel(card));
 
     if (selecting && !fxPlaying) {
       if (selectedCardIds.includes(card.id)) btn.classList.add("selected");
@@ -770,12 +880,29 @@ function renderActions() {
 
   const humanTurn = state?.status === "betting" && state.currentPlayerId === 0 && !busy;
   const me = state?.players[0];
+  const canPeek = Boolean(me && !me.isBlind && me.hand?.length && state.status !== "finished");
+  const canDoLook = humanTurn && canLook(state, 0);
 
-  lookButton.disabled = !humanTurn || !canLook(state, 0);
+  lookButton.disabled = busy || selecting || !(canDoLook || canPeek);
+  lookButton.textContent = peekingCards && canPeek && !peekUntilBet ? "收起牌" : "看牌";
   foldButton.disabled = !((humanTurn || selecting) && !fxPlaying) || !canFold(state, 0);
   callButton.disabled = !humanTurn || !canCall(state, 0);
   const targets = state ? compareTargets(state, 0) : [];
+  const compareReason =
+    state && started && state.status === "betting" && state.currentPlayerId === 0 && !targets.length
+      ? compareUnavailableReason(state, 0)
+      : "";
   compareButton.disabled = !humanTurn || !targets.length;
+  compareButton.title = compareButton.disabled
+    ? compareReason || (!humanTurn ? "还没轮到你" : "当前不能比牌")
+    : "选择一名对手比牌";
+  if (!humanTurn) {
+    compareButton.textContent = "比牌";
+  } else if (!targets.length) {
+    compareButton.textContent = shortCompareReason(compareReason);
+  } else {
+    compareButton.textContent = pickingCompare ? "选择对手中…" : "比牌";
+  }
 
   lookButton.classList.toggle("is-ready", !lookButton.disabled);
   callButton.classList.toggle("is-ready", !callButton.disabled);
@@ -796,16 +923,26 @@ function renderActions() {
 
   compareTargetsEl.classList.toggle("hidden", !pickingCompare || !targets.length || busy);
   compareTargetsEl.innerHTML = "";
-  if (pickingCompare && !busy) {
+  if (pickingCompare && !busy && targets.length) {
+    const title = document.createElement("p");
+    title.className = "zjh-compare-pick-title";
+    title.textContent = me?.isBlind
+      ? "点选牌桌上的对手，或点下方按钮比牌"
+      : "只能比已看牌对手：点选牌桌座位或下方按钮";
+    compareTargetsEl.append(title);
     targets.forEach((id) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.dataset.targetId = String(id);
-      const rival = state.players[id];
-      const tag = rival.isBlind ? "闷牌" : "已看牌";
-      btn.textContent = `与 ${rival.name}（${tag}）比牌`;
+      btn.textContent = rival.name;
       compareTargetsEl.append(btn);
     });
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.dataset.cancel = "1";
+    cancel.className = "zjh-compare-cancel";
+    cancel.textContent = "取消";
+    compareTargetsEl.append(cancel);
   }
 
   [lookButton, compareButton].forEach((btn) => {
@@ -851,22 +988,28 @@ function hintText() {
     return `请点选 3 张牌用于比牌（已选 ${selectedCardIds.length}/3）`;
   }
   if (state.currentPlayerId !== 0) return "等待其他玩家行动…";
-  if (state.roundCount <= 1) return "第一轮不能比牌。先选筹码大小再出筹，也可看牌或弃牌。";
   if (pickingCompare) {
     return state.players[0].isBlind
-      ? "闷牌可与任意玩家比牌，请选择对手。"
-      : "看牌可与其他已看牌玩家比牌；不能主动比闷牌玩家。";
+      ? "闷牌可与任意玩家比牌：请点牌桌座位或下方按钮。"
+      : "看牌只能比已看牌玩家：请点带「看牌」标记的座位。";
   }
   const me = state.players[0];
-  if (me.isBlind) return "输入金额或用 −/+ 调整，再点「出筹码」。";
-  if (state.roundCount > 1 && !compareTargets(state, 0).length && activePlayersAlive()) {
-    return "看牌后可与已看牌的对手比牌；当前对手都还在闷牌。";
+  const targets = compareTargets(state, 0);
+  if (!targets.length) {
+    const reason = compareUnavailableReason(state, 0);
+    if (reason) return reason;
   }
+  if (me.isBlind) return "输入金额或用 −/+ 调整，再点「出筹码」。也可比牌或弃牌。";
   return "看牌可与已看牌玩家比牌。出筹、比牌或弃牌。";
 }
 
-function activePlayersAlive() {
-  return state?.players.some((p) => p.id !== 0 && !p.folded && !p.out) ?? false;
+function shortCompareReason(reason) {
+  if (!reason) return "比牌";
+  if (reason.includes("第一轮") || reason.includes("出过一次")) return "比牌·等全员出筹";
+  if (reason.includes("都还在闷牌")) return "比牌·等对手看牌";
+  if (reason.includes("筹码不足")) return "比牌·筹码不足";
+  if (reason.includes("还没轮到")) return "比牌";
+  return "比牌·暂不可用";
 }
 
 function formatChips(n) {

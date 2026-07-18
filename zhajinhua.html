@@ -60,7 +60,7 @@
 
       <section class="zjh-table-wrap" aria-label="炸金花牌桌">
         <div class="zjh-status" aria-label="牌局状态">
-          <span id="potBadge" class="zjh-pill">池：0</span>
+          <span id="potBadge" class="zjh-pill">总筹码：0</span>
           <span id="roundBadge" class="zjh-pill">第 1 轮</span>
           <span id="stakeBadge" class="zjh-pill zjh-pill-wide">闷注：1000</span>
         </div>
@@ -68,9 +68,9 @@
           <div class="zjh-table-shine" aria-hidden="true"></div>
           <div class="zjh-table-rail" aria-hidden="true"></div>
           <div id="seats" class="zjh-seats" aria-label="玩家座位"></div>
+          <div id="tableBets" class="zjh-table-bets" aria-label="本轮各玩家出筹"></div>
           <div class="zjh-pot-area">
-            <div id="chips" class="zjh-chips" aria-hidden="true"></div>
-            <div class="zjh-pot-label">底池</div>
+            <div class="zjh-pot-label">总筹码</div>
             <div id="potAmount" class="zjh-pot-amount">0</div>
             <p id="turnHint" class="zjh-turn-hint">准备开始</p>
           </div>
@@ -156,11 +156,11 @@
             <button id="rulesCloseButton" type="button">关闭</button>
           </div>
           <ul>
-            <li>每人起始筹码 100000，底注 1000；每次出筹不少于当前跟注额。</li>
+            <li>每人起始筹码 1000000，底注 1000；每次出筹不少于当前跟注额。</li>
             <li>开局牌面朝下。出筹前可选择筹码大小；闷牌按 1000 步进，看牌按 2000 步进。</li>
             <li>闷牌出筹不得低于前一次闷牌筹码；看牌出筹不得低于前一次看牌筹码，且看注至少为闷注两倍。</li>
             <li>看牌出筹后，闷注须大于该看注的一半（例如看牌出 6000，闷牌至少 4000）。</li>
-            <li>第一轮不可比牌，但可以看牌后弃牌。</li>
+            <li>第一轮不可比牌：一局中所有玩家都还没出过第一次筹码前不能比；所有人都出过一次筹之后才可比牌。</li>
             <li>看牌玩家可以和已看牌的玩家比牌，但不能主动与闷牌玩家比牌；闷牌玩家可与任意玩家比牌。</li>
             <li>你仍在局中时，他人比牌只显示胜负；自己闷着比牌也不亮牌，只有看牌后再比牌才能看到双方牌面。</li>
             <li>可选 3 张或 5 张模式；5 张比牌时双方各从手牌中选 3 张比较。</li>

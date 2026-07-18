@@ -121,7 +121,7 @@ function card(rank, suit, rankValue) {
   assert.equal(state.players[actor].chips, START_CHIPS - ANTE - MIN_BET);
 }
 
-// —— 看牌后跟注翻倍；第一轮不可比牌 ——
+// —— 看牌后跟注翻倍；所有人未出齐第一次筹前不可比牌 ——
 {
   const state = createGame({ playerCount: 2, cardsPerPlayer: 3, random: () => 0.2, dealerId: 1 });
   // dealer 1 → current starts at 0
@@ -131,16 +131,18 @@ function card(rank, suit, rankValue) {
   assert.equal(callCost(state, 0), MIN_BET * 2);
   assert.equal(canCompare(state, 0, 1), false);
   assert.ok(callBet(state, 0));
+  // 对手尚未出筹，仍属第一轮
+  assert.equal(canCompare(state, 0, 1), false);
 }
 
-// —— 第二轮：看牌不能主动比闷牌；闷牌可以比看牌 ——
+// —— 所有人第一次出筹完成后可比牌；看牌不能主动比闷牌；闷牌可以比看牌 ——
 {
   const state = createGame({ playerCount: 2, cardsPerPlayer: 3, random: () => 0.3, dealerId: 1 });
   assert.equal(state.currentPlayerId, 0);
-  // 走完第一轮
+  // 双方都出过第一次筹
   assert.ok(callBet(state, 0));
   assert.ok(callBet(state, 1));
-  assert.equal(state.roundCount, 2);
+  assert.ok(state.players.every((p) => p.hasPutChips));
 
   assert.ok(lookCards(state, 0));
   assert.equal(state.players[1].isBlind, true);
@@ -151,6 +153,19 @@ function card(rank, suit, rankValue) {
   assert.ok(callBet(state, 0));
   assert.equal(state.currentPlayerId, 1);
   assert.equal(canCompare(state, 1, 0), true);
+}
+
+// —— 有人加注时：只要全员都出过一次筹即可比牌（不必等整圈跟平）——
+{
+  const state = createGame({ playerCount: 3, cardsPerPlayer: 3, random: () => 0.31, dealerId: 2 });
+  assert.equal(state.currentPlayerId, 0);
+  assert.ok(placeBet(state, 0, MIN_BET));
+  assert.ok(placeBet(state, 1, MIN_BET * 3)); // 闷加，水位抬高
+  assert.ok(callBet(state, 2));
+  // 此时 0 还要补筹，roundCount 可能仍为 1，但三人都已出过筹
+  assert.equal(state.currentPlayerId, 0);
+  assert.ok(state.players.every((p) => !p.folded && p.hasPutChips));
+  assert.equal(canCompare(state, 0, 1), true);
 }
 
 // —— 看牌可以和看牌比牌 ——

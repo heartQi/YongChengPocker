@@ -14,7 +14,7 @@ export const JOKERS = [
   { id: "big-joker", rank: "大王", rankValue: 16, suit: "joker", suitSymbol: "🃏", color: "red", isJoker: true }
 ];
 
-export const START_CHIPS = 100_000;
+export const START_CHIPS = 1_000_000;
 export const ANTE = 1_000;
 export const MIN_BET = 1_000;
 
@@ -98,7 +98,11 @@ export function createGame(options = {}) {
       eliminated: false,
       out: chips < ANTE,
       betThisRound: 0,
+      /** 最近一轮该玩家出的筹（回合切走后仍用于桌面展示） */
+      lastRoundBet: 0,
       totalBet: antePaid,
+      /** 本局是否已主动出过筹（底注不算；用于判定「第一轮」是否结束） */
+      hasPutChips: false,
       selectedCardIds: []
     };
   });
@@ -313,18 +317,40 @@ export function canRaise(state, playerId, raiseTo) {
   return cost > 0 && player.chips >= cost;
 }
 
+/** 本局所有仍在局玩家是否都已出过至少一次筹（第一轮 = 尚未全部出过） */
+export function allPlayersHavePutChips(state) {
+  const alive = activePlayers(state);
+  return alive.length >= 2 && alive.every((p) => p.hasPutChips);
+}
+
+/** 是否已过第一轮（所有人第一次出筹都完成），此后才可比牌 */
+export function canCompareByRound(state) {
+  return allPlayersHavePutChips(state);
+}
+
 export function canCompare(state, playerId, targetId) {
-  if (state.status !== "betting" || state.currentPlayerId !== playerId) return false;
-  if (state.roundCount <= 1) return false;
+  return compareBlockReason(state, playerId, targetId) === null;
+}
+
+/** 不可比牌时返回原因，可以比则返回 null */
+export function compareBlockReason(state, playerId, targetId) {
+  if (state.status !== "betting" || state.currentPlayerId !== playerId) {
+    return "还没轮到你";
+  }
+  if (!canCompareByRound(state)) {
+    return "第一轮不能比牌（需等所有人先出过一次筹）";
+  }
   const actor = state.players[playerId];
   const target = state.players[targetId];
-  if (!actor || !target) return false;
-  if (actor.folded || actor.out || target.folded || target.out) return false;
-  if (playerId === targetId) return false;
+  if (!actor || !target) return "对手无效";
+  if (actor.folded || actor.out) return "你已不在局中";
+  if (target.folded || target.out) return "对方已不在局中";
+  if (playerId === targetId) return "不能与自己比牌";
   // 看牌只能和已看牌的比；闷牌可与任意人比（含看牌）
-  if (!actor.isBlind && target.isBlind) return false;
+  if (!actor.isBlind && target.isBlind) return "看牌后不能主动比闷牌玩家";
   const cost = compareCost(state, playerId);
-  return actor.chips >= cost;
+  if (actor.chips < cost) return `筹码不足（比牌需 ${cost}）`;
+  return null;
 }
 
 export function compareTargets(state, playerId) {
@@ -332,6 +358,30 @@ export function compareTargets(state, playerId) {
     .filter((p) => p.id !== playerId)
     .filter((p) => canCompare(state, playerId, p.id))
     .map((p) => p.id);
+}
+
+/** 当前为何不能点「比牌」（无人可选时的总原因） */
+export function compareUnavailableReason(state, playerId) {
+  if (!state || state.status !== "betting") return "当前不能比牌";
+  if (state.currentPlayerId !== playerId) return "还没轮到你";
+  if (!canCompareByRound(state)) {
+    return "第一轮不能比牌：等所有人先出过一次筹码后才可";
+  }
+  const actor = state.players[playerId];
+  if (!actor || actor.folded || actor.out) return "你已不在局中";
+  const rivals = activePlayers(state).filter((p) => p.id !== playerId);
+  if (!rivals.length) return "没有可比的对手";
+  if (!actor.isBlind) {
+    const seenRivals = rivals.filter((p) => !p.isBlind);
+    if (!seenRivals.length) return "看牌后只能比已看牌对手，当前对手都还在闷牌";
+  }
+  for (const rival of rivals) {
+    const reason = compareBlockReason(state, playerId, rival.id);
+    if (reason === null) return null;
+  }
+  const cost = compareCost(state, playerId);
+  if (actor.chips < cost) return `筹码不足（比牌需 ${cost}）`;
+  return "当前没有可比的对手";
 }
 
 export function lookCards(state, playerId) {
@@ -672,25 +722,30 @@ export function chooseAiMove(state, playerId) {
   const cost = callCost(state, playerId);
   const potOdds = cost / Math.max(1, state.pot + cost);
 
-  // 看牌（提高频率，便于看牌之间互相比牌）
-  if (player.isBlind && strength >= 0.4 && Math.random() < 0.55) {
+  // 看牌：所有人出过一次筹后提高频率，方便看牌之间互相比牌
+  if (player.isBlind && canCompareByRound(state) && Math.random() < 0.75) {
     return { type: "look" };
   }
-  if (player.isBlind && state.roundCount >= 2 && Math.random() < 0.5) {
+  if (player.isBlind && strength >= 0.42 && Math.random() < 0.4) {
     return { type: "look" };
   }
 
-  // 弱牌弃牌
-  if (!player.isBlind && strength < 0.22 && cost > 0 && potOdds > 0.35) {
+  // 弱牌弃牌（刚看牌时少弃，避免桌上瞬间没有「已看牌」对手）
+  if (!player.isBlind && strength < 0.18 && cost > 0 && potOdds > 0.4 && Math.random() < 0.45) {
     return { type: "fold" };
   }
-  if (strength < 0.12 && state.roundCount >= 2 && cost >= state.minBet * 2) {
+  if (
+    strength < 0.1 &&
+    canCompareByRound(state) &&
+    cost >= state.minBet * 2 &&
+    Math.random() < 0.5
+  ) {
     return { type: "fold" };
   }
 
   // 比牌
   const targets = compareTargets(state, playerId);
-  if (targets.length && strength >= 0.55 && state.roundCount >= 2 && Math.random() < 0.45) {
+  if (targets.length && strength >= 0.5 && canCompareByRound(state) && Math.random() < 0.5) {
     const targetId = targets[Math.floor(Math.random() * targets.length)];
     return { type: "compare", targetId };
   }
@@ -746,6 +801,7 @@ function pay(state, player, amount) {
   player.betThisRound += amount;
   player.totalBet += amount;
   state.pot += amount;
+  player.hasPutChips = true;
   return true;
 }
 
@@ -766,11 +822,18 @@ function afterAction(state, playerId, isRaise) {
   if (!isRaise && bettingRoundComplete(state)) {
     state.roundCount += 1;
     state.actedThisRound = [];
-    // 新一轮重置本轮下注计数（水位保留）
+    // 新一轮重置本轮下注计数（水位保留）；先记下每人最近一轮出筹供桌面显示
     for (const p of state.players) {
+      p.lastRoundBet = p.betThisRound;
       p.betThisRound = 0;
     }
-    state.log.push(createLogEntry("回合", `进入第 ${state.roundCount} 轮`, state.roundCount === 2 ? "现在可以比牌了" : ""));
+    state.log.push(
+      createLogEntry(
+        "回合",
+        `进入第 ${state.roundCount} 轮`,
+        allPlayersHavePutChips(state) ? "所有人已出过筹，可以比牌" : ""
+      )
+    );
   }
 
   state.currentPlayerId = nextActiveId(state.players, playerId);
