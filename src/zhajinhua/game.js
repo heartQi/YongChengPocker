@@ -119,9 +119,12 @@ export function createGame(options = {}) {
     pot,
     ante: ANTE,
     minBet: MIN_BET,
-    /** 当前闷注水位（看牌跟注为其两倍） */
+    /** 闷牌最低本轮下注（不得低于前一次闷牌筹码） */
+    blindCallLevel: MIN_BET,
+    /** 看牌最低本轮下注（不得低于前一次看牌筹码，且至少闷注×2） */
+    seenCallLevel: MIN_BET * 2,
+    /** 兼容旧字段：等同闷注水位 */
     blindStake: MIN_BET,
-    /** 本轮每人已跟到的闷注口径（看牌玩家按 2 倍计入） */
     callLevel: MIN_BET,
     dealerId,
     currentPlayerId,
@@ -162,11 +165,17 @@ export function isHuman(playerId) {
   return playerId === 0;
 }
 
+/** 当前玩家需要跟到的本轮下注目标 */
+export function stakeTarget(state, playerId) {
+  const player = state.players[playerId];
+  if (!player) return state.blindCallLevel;
+  return player.isBlind ? state.blindCallLevel : state.seenCallLevel;
+}
+
 export function callCost(state, playerId) {
   const player = state.players[playerId];
   if (!player || player.folded || player.out) return 0;
-  const target = player.isBlind ? state.callLevel : state.callLevel * 2;
-  return Math.max(0, target - player.betThisRound);
+  return Math.max(0, stakeTarget(state, playerId) - player.betThisRound);
 }
 
 /** 闷牌按底注步进，看牌按两倍步进 */
@@ -177,10 +186,27 @@ export function betUnit(state, playerId) {
 }
 
 export function minRaiseTo(state, playerId) {
-  const player = state.players[playerId];
   const unit = betUnit(state, playerId);
-  const currentTarget = player.isBlind ? state.callLevel : state.callLevel * 2;
-  return currentTarget + unit;
+  return stakeTarget(state, playerId) + unit;
+}
+
+/** 下注后抬升对应水位：闷牌/看牌各自不得比前一次更低 */
+export function updateStakeLevels(state, playerId) {
+  const player = state.players[playerId];
+  if (!player) return;
+  const paid = player.betThisRound;
+  if (player.isBlind) {
+    state.blindCallLevel = Math.max(state.blindCallLevel, paid);
+    state.seenCallLevel = Math.max(state.seenCallLevel, state.blindCallLevel * 2);
+  } else {
+    state.seenCallLevel = Math.max(state.seenCallLevel, paid);
+    // 看牌加注后，闷注至少为看注一半（保持「看=闷×2」关系）
+    const half = Math.ceil(state.seenCallLevel / 2 / state.minBet) * state.minBet;
+    state.blindCallLevel = Math.max(state.blindCallLevel, half);
+    state.seenCallLevel = Math.max(state.seenCallLevel, state.blindCallLevel * 2);
+  }
+  state.callLevel = state.blindCallLevel;
+  state.blindStake = state.blindCallLevel;
 }
 
 export function raiseCost(state, playerId, raiseTo) {
@@ -247,7 +273,7 @@ export function placeBet(state, playerId, payAmount) {
 }
 
 export function compareCost(state, playerId) {
-  return callCost(state, playerId) || (state.players[playerId].isBlind ? state.callLevel : state.callLevel * 2);
+  return callCost(state, playerId) || stakeTarget(state, playerId);
 }
 
 export function canLook(state, playerId) {
@@ -294,7 +320,7 @@ export function canCompare(state, playerId, targetId) {
   if (!actor || !target) return false;
   if (actor.folded || actor.out || target.folded || target.out) return false;
   if (playerId === targetId) return false;
-  // 看牌玩家不能主动和闷牌玩家比牌
+  // 看牌只能和已看牌的比；闷牌可与任意人比（含看牌）
   if (!actor.isBlind && target.isBlind) return false;
   const cost = compareCost(state, playerId);
   return actor.chips >= cost;
@@ -334,15 +360,22 @@ export function callBet(state, playerId) {
   const player = state.players[playerId];
   const cost = callCost(state, playerId);
   if (!pay(state, player, cost)) return false;
+  updateStakeLevels(state, playerId);
   const label = player.isBlind ? "闷跟" : "跟注";
   state.lastAction = { type: "call", playerId, amount: cost, label };
-  state.log.push(createLogEntry(label, `${player.name} ${label} ${cost}`, `池内 ${state.pot}`));
+  state.log.push(
+    createLogEntry(
+      label,
+      `${player.name} ${label} ${cost}`,
+      `闷注 ${state.blindCallLevel} / 看注 ${state.seenCallLevel}，池内 ${state.pot}`
+    )
+  );
   markActed(state, playerId);
   return afterAction(state, playerId, false);
 }
 
 /**
- * @param {number} raiseTo 目标本轮下注额（看牌口径下为看牌金额）
+ * @param {number} raiseTo 目标本轮下注额（闷牌/看牌各自口径）
  */
 export function raiseBet(state, playerId, raiseTo) {
   if (!canRaise(state, playerId, raiseTo)) return false;
@@ -350,15 +383,16 @@ export function raiseBet(state, playerId, raiseTo) {
   const cost = raiseCost(state, playerId, raiseTo);
   if (!pay(state, player, cost)) return false;
 
-  // 抬升闷注水位：看牌加注金额按两倍口径折算
-  const newBlindLevel = player.isBlind ? raiseTo : Math.ceil(raiseTo / 2);
-  state.callLevel = Math.max(state.callLevel, newBlindLevel);
-  state.blindStake = state.callLevel;
+  updateStakeLevels(state, playerId);
   state.actedThisRound = [playerId];
   const label = player.isBlind ? "闷加" : "加注";
   state.lastAction = { type: "raise", playerId, amount: cost, raiseTo, label };
   state.log.push(
-    createLogEntry(label, `${player.name} ${label} 至 ${raiseTo}`, `闷注水位 ${state.callLevel}，池内 ${state.pot}`)
+    createLogEntry(
+      label,
+      `${player.name} ${label} 至 ${raiseTo}`,
+      `闷注 ${state.blindCallLevel} / 看注 ${state.seenCallLevel}，池内 ${state.pot}`
+    )
   );
   return afterAction(state, playerId, true);
 }
@@ -637,11 +671,11 @@ export function chooseAiMove(state, playerId) {
   const cost = callCost(state, playerId);
   const potOdds = cost / Math.max(1, state.pot + cost);
 
-  // 偶尔看牌
-  if (player.isBlind && strength >= 0.45 && Math.random() < 0.35) {
+  // 看牌（提高频率，便于看牌之间互相比牌）
+  if (player.isBlind && strength >= 0.4 && Math.random() < 0.55) {
     return { type: "look" };
   }
-  if (player.isBlind && strength < 0.25 && state.roundCount >= 2 && Math.random() < 0.4) {
+  if (player.isBlind && state.roundCount >= 2 && Math.random() < 0.5) {
     return { type: "look" };
   }
 
@@ -745,10 +779,7 @@ function afterAction(state, playerId, isRaise) {
 function bettingRoundComplete(state) {
   const alive = activePlayers(state);
   if (alive.length < 2) return false;
-  const allMatched = alive.every((p) => {
-    const target = p.isBlind ? state.callLevel : state.callLevel * 2;
-    return p.betThisRound >= target;
-  });
+  const allMatched = alive.every((p) => p.betThisRound >= stakeTarget(state, p.id));
   const allActed = alive.every((p) => state.actedThisRound.includes(p.id));
   return allMatched && allActed;
 }

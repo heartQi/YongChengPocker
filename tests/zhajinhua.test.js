@@ -153,6 +153,25 @@ function card(rank, suit, rankValue) {
   assert.equal(canCompare(state, 1, 0), true);
 }
 
+// —— 看牌可以和看牌比牌 ——
+{
+  const state = createGame({ playerCount: 3, cardsPerPlayer: 3, random: () => 0.33, dealerId: 2 });
+  while (state.roundCount < 2 && state.status === "betting") {
+    assert.ok(callBet(state, state.currentPlayerId));
+  }
+  state.currentPlayerId = 0;
+  state.players[0].isBlind = false;
+  state.players[1].isBlind = false;
+  state.players[2].isBlind = true;
+  state.players.forEach((p) => {
+    p.folded = false;
+    p.betThisRound = 0;
+  });
+  assert.equal(canCompare(state, 0, 1), true);
+  assert.equal(canCompare(state, 0, 2), false);
+  assert.deepEqual(compareTargets(state, 0), [1]);
+}
+
 // —— 弃牌只剩一人结算 ——
 {
   const state = createGame({ playerCount: 2, cardsPerPlayer: 3, random: () => 0.4, dealerId: 1 });
@@ -250,7 +269,8 @@ function card(rank, suit, rankValue) {
 {
   const state = createGame({ playerCount: 2, cardsPerPlayer: 3, random: () => 0.7, dealerId: 1 });
   assert.ok(raiseBet(state, 0, MIN_BET * 2));
-  assert.equal(state.callLevel, MIN_BET * 2);
+  assert.equal(state.blindCallLevel, MIN_BET * 2);
+  assert.equal(state.seenCallLevel, MIN_BET * 4);
   assert.equal(callCost(state, 1), MIN_BET * 2);
 }
 
@@ -263,17 +283,45 @@ function card(rank, suit, rankValue) {
   assert.ok(blindChoices.some((n) => n > MIN_BET));
   assert.equal(normalizePayAmount(state, 0, MIN_BET * 5), MIN_BET * 5);
   assert.ok(placeBet(state, 0, MIN_BET * 5));
-  assert.equal(state.callLevel, MIN_BET * 5);
+  assert.equal(state.blindCallLevel, MIN_BET * 5);
+  assert.equal(state.seenCallLevel, MIN_BET * 10);
 
-  // 看牌后出筹按两倍
+  // 看牌后出筹不得低于看注水位
   assert.equal(state.currentPlayerId, 1);
   assert.ok(lookCards(state, 1));
   const seenMin = callCost(state, 1);
-  assert.equal(seenMin, MIN_BET * 5 * 2);
+  assert.equal(seenMin, MIN_BET * 10);
   const seenPay = normalizePayAmount(state, 1, seenMin + MIN_BET * 2);
   assert.ok(seenPay >= seenMin + MIN_BET * 2);
   assert.ok(placeBet(state, 1, seenPay));
-  assert.ok(state.callLevel >= MIN_BET * 5);
+  assert.ok(state.seenCallLevel >= seenPay);
+  assert.ok(state.blindCallLevel >= Math.ceil(state.seenCallLevel / 2 / MIN_BET) * MIN_BET - MIN_BET);
+}
+
+// —— 闷注/看注分别不能比前一次更低 ——
+{
+  const state = createGame({ playerCount: 3, cardsPerPlayer: 3, random: () => 0.74, dealerId: 2 });
+  assert.equal(state.blindCallLevel, MIN_BET);
+  assert.equal(state.seenCallLevel, MIN_BET * 2);
+
+  assert.equal(state.currentPlayerId, 0);
+  assert.ok(placeBet(state, 0, MIN_BET * 3)); // 闷加 3000
+  assert.equal(state.blindCallLevel, MIN_BET * 3);
+  assert.equal(state.seenCallLevel, MIN_BET * 6);
+
+  // 下一闷牌玩家跟注不得低于 3000
+  assert.equal(state.currentPlayerId, 1);
+  assert.equal(callCost(state, 1), MIN_BET * 3);
+  assert.ok(callBet(state, 1));
+  assert.equal(state.blindCallLevel, MIN_BET * 3);
+
+  // 看牌玩家至少 6000
+  assert.equal(state.currentPlayerId, 2);
+  assert.ok(lookCards(state, 2));
+  assert.equal(callCost(state, 2), MIN_BET * 6);
+  assert.ok(placeBet(state, 2, MIN_BET * 8)); // 看加 8000
+  assert.equal(state.seenCallLevel, MIN_BET * 8);
+  assert.ok(state.blindCallLevel >= MIN_BET * 4);
 }
 
 console.log("zhajinhua tests passed");

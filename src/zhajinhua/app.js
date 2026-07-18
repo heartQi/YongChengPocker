@@ -539,7 +539,7 @@ function render() {
   if (!state) return;
   potBadgeEl.textContent = `池：${formatChips(state.pot)}`;
   roundBadgeEl.textContent = `第 ${state.roundCount} 轮`;
-  stakeBadgeEl.textContent = `闷注：${formatChips(state.callLevel)}`;
+  stakeBadgeEl.textContent = `闷注：${formatChips(state.blindCallLevel ?? state.callLevel)} / 看注：${formatChips(state.seenCallLevel ?? state.callLevel * 2)}`;
   potAmountEl.textContent = formatChips(state.pot);
   turnHintEl.textContent = turnText();
   renderSeats();
@@ -819,7 +819,9 @@ function renderActions() {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.dataset.targetId = String(id);
-      btn.textContent = `与 ${state.players[id].name} 比牌`;
+      const rival = state.players[id];
+      const tag = rival.isBlind ? "闷牌" : "已看牌";
+      btn.textContent = `与 ${rival.name}（${tag}）比牌`;
       compareTargetsEl.append(btn);
     });
   }
@@ -878,10 +880,21 @@ function hintText() {
   }
   if (state.currentPlayerId !== 0) return "等待其他玩家行动…";
   if (state.roundCount <= 1) return "第一轮不能比牌。先选筹码大小再出筹，也可看牌或弃牌。";
-  if (pickingCompare) return "选择要比牌的对手。看牌玩家不能主动比闷牌玩家。";
+  if (pickingCompare) {
+    return state.players[0].isBlind
+      ? "闷牌可与任意玩家比牌，请选择对手。"
+      : "看牌可与其他已看牌玩家比牌；不能主动比闷牌玩家。";
+  }
   const me = state.players[0];
   if (me.isBlind) return "输入或选择金额后，点下方金色「出筹码」按钮。";
-  return "看牌出筹可输入金额，点下方金色「出筹码」确认；也可比牌或弃牌。";
+  if (state.roundCount > 1 && !compareTargets(state, 0).length && activePlayersAlive()) {
+    return "看牌后可与已看牌的对手比牌；当前对手都还在闷牌，不能主动比他们。";
+  }
+  return "看牌可与已看牌玩家比牌。选好金额出筹，或比牌 / 弃牌。";
+}
+
+function activePlayersAlive() {
+  return state?.players.some((p) => p.id !== 0 && !p.folded && !p.out) ?? false;
 }
 
 function formatChips(n) {
